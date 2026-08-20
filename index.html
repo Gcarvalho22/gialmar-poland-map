@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>🗺️ Clientes Gialmar – Polónia</title>
+<title>🗺️ Clientes Gialmar – Polónia (Live)</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css"/>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
@@ -13,7 +13,6 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Segoe UI', sans-serif; background: #f0f4f8; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
 
-  /* HEADER */
   .header {
     background: linear-gradient(135deg, #0a2744 0%, #1565c0 100%);
     color: white; padding: 10px 20px;
@@ -21,18 +20,21 @@
     box-shadow: 0 2px 10px rgba(0,0,0,0.3); z-index: 1000; flex-shrink: 0;
   }
   .header-left { display: flex; align-items: center; gap: 12px; }
-  .header-logo { font-size: 22px; }
   .header-title { font-size: 18px; font-weight: 700; }
-  .header-sub { font-size: 12px; opacity: 0.7; }
+  .header-sub { font-size: 11px; opacity: 0.7; }
+  .live-badge {
+    background: #43a047; color: white; padding: 3px 10px; border-radius: 20px;
+    font-size: 11px; font-weight: 700; display: flex; align-items: center; gap: 5px;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse { 0%,100% { opacity:1 } 50% { opacity:0.6 } }
   .header-stats { display: flex; gap: 16px; }
   .hstat { text-align: center; }
   .hstat-val { font-size: 20px; font-weight: 800; }
   .hstat-lbl { font-size: 10px; opacity: 0.7; text-transform: uppercase; }
 
-  /* LAYOUT */
   .main { display: flex; flex: 1; overflow: hidden; }
 
-  /* SIDEBAR */
   .sidebar {
     width: 320px; background: white; display: flex; flex-direction: column;
     box-shadow: 2px 0 10px rgba(0,0,0,0.1); z-index: 500; overflow: hidden; flex-shrink: 0;
@@ -44,17 +46,14 @@
     display: flex; align-items: center; justify-content: center; gap: 5px;
   }
   .tab-btn.active { color: #1565c0; border-bottom: 2px solid #1565c0; margin-bottom: -2px; background: #e3f2fd; }
-  .tab-btn:hover { background: #f5f5f5; }
   .tab-content { display: none; flex: 1; overflow-y: auto; padding: 12px; }
   .tab-content.active { display: flex; flex-direction: column; gap: 8px; }
 
-  /* CONTACT CARDS */
   .contact-card {
     border: 1.5px solid #e0e0e0; border-radius: 8px; padding: 10px 12px;
     cursor: pointer; transition: all 0.2s; background: white; position: relative;
   }
   .contact-card:hover { border-color: #1565c0; box-shadow: 0 2px 8px rgba(21,101,192,0.15); transform: translateX(2px); }
-  .contact-card.selected { border-color: #1565c0; background: #e3f2fd; }
   .contact-card.in-route { border-color: #43a047; background: #e8f5e9; }
   .card-header { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
   .priority-badge {
@@ -62,8 +61,7 @@
     justify-content: center; font-size: 11px; font-weight: 800; color: white; flex-shrink: 0;
   }
   .card-company { font-size: 13px; font-weight: 700; color: #0d2137; flex: 1; }
-  .card-city { font-size: 11px; color: #666; display: flex; align-items: center; gap: 4px; }
-  .card-city i { color: #1565c0; font-size: 10px; }
+  .card-city { font-size: 11px; color: #666; display: flex; align-items: center; gap: 4px; margin-bottom: 5px; }
   .route-num {
     position: absolute; top: 8px; right: 8px;
     background: #1565c0; color: white; border-radius: 50%;
@@ -71,7 +69,7 @@
     display: flex; align-items: center; justify-content: center;
   }
   .add-route-btn {
-    margin-top: 6px; padding: 4px 10px; border: 1.5px solid #1565c0;
+    padding: 4px 10px; border: 1.5px solid #1565c0;
     border-radius: 20px; background: none; color: #1565c0; font-size: 11px;
     cursor: pointer; font-weight: 600; transition: all 0.2s; display: inline-flex; align-items: center; gap: 4px;
   }
@@ -79,7 +77,6 @@
   .add-route-btn.remove { border-color: #e53935; color: #e53935; }
   .add-route-btn.remove:hover { background: #e53935; color: white; }
 
-  /* ROUTE PANEL */
   .route-panel { display: flex; flex-direction: column; gap: 8px; }
   .route-header { font-size: 13px; font-weight: 700; color: #0d2137; display: flex; align-items: center; gap: 6px; }
   .route-empty { text-align: center; color: #999; font-size: 13px; padding: 30px 10px; }
@@ -100,145 +97,115 @@
     background: none; border: none; color: #e53935; cursor: pointer;
     font-size: 14px; padding: 2px 6px; border-radius: 4px;
   }
-  .stop-remove:hover { background: #ffebee; }
-  .move-btn {
-    background: none; border: none; color: #999; cursor: pointer;
-    font-size: 12px; padding: 2px 4px;
-  }
+  .move-btn { background: none; border: none; color: #999; cursor: pointer; font-size: 12px; padding: 2px 4px; }
   .move-btn:hover { color: #1565c0; }
 
   .route-actions { display: flex; flex-direction: column; gap: 6px; margin-top: 4px; }
-  .btn-primary {
-    padding: 9px 14px; background: #1565c0; color: white; border: none;
-    border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600;
-    display: flex; align-items: center; justify-content: center; gap: 6px;
-    transition: all 0.2s;
-  }
+  .btn-primary { padding: 9px 14px; background: #1565c0; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s; }
   .btn-primary:hover { background: #0d47a1; }
-  .btn-secondary {
-    padding: 9px 14px; background: white; color: #1565c0; border: 2px solid #1565c0;
-    border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600;
-    display: flex; align-items: center; justify-content: center; gap: 6px;
-    transition: all 0.2s;
-  }
+  .btn-secondary { padding: 9px 14px; background: white; color: #1565c0; border: 2px solid #1565c0; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s; }
   .btn-secondary:hover { background: #e3f2fd; }
-  .btn-danger {
-    padding: 9px 14px; background: white; color: #e53935; border: 2px solid #e53935;
-    border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600;
-    display: flex; align-items: center; justify-content: center; gap: 6px;
-    transition: all 0.2s;
-  }
+  .btn-danger { padding: 9px 14px; background: white; color: #e53935; border: 2px solid #e53935; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s; }
   .btn-danger:hover { background: #ffebee; }
-  .btn-success {
-    padding: 9px 14px; background: #2e7d32; color: white; border: none;
-    border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600;
-    display: flex; align-items: center; justify-content: center; gap: 6px;
-    transition: all 0.2s;
-  }
+  .btn-success { padding: 9px 14px; background: #2e7d32; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s; }
   .btn-success:hover { background: #1b5e20; }
 
-  /* ROUTE INFO */
-  .route-info-box {
-    background: linear-gradient(135deg, #e3f2fd, #bbdefb);
-    border: 1.5px solid #1565c0; border-radius: 8px; padding: 10px 12px;
-    font-size: 12px; color: #0d2137;
-  }
+  .route-info-box { background: linear-gradient(135deg, #e3f2fd, #bbdefb); border: 1.5px solid #1565c0; border-radius: 8px; padding: 10px 12px; font-size: 12px; color: #0d2137; }
   .route-info-box .ri-title { font-weight: 700; margin-bottom: 6px; font-size: 13px; }
   .route-info-box .ri-row { display: flex; justify-content: space-between; margin-bottom: 3px; }
   .route-info-box .ri-val { font-weight: 700; color: #1565c0; }
 
-  /* LEGEND */
   .legend { padding: 10px 12px; border-top: 1px solid #e0e0e0; background: #fafafa; flex-shrink: 0; }
   .legend-title { font-size: 11px; font-weight: 700; color: #666; text-transform: uppercase; margin-bottom: 6px; }
   .legend-items { display: flex; gap: 12px; flex-wrap: wrap; }
   .legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: #444; }
   .legend-dot { width: 12px; height: 12px; border-radius: 50%; }
 
-  /* SEARCH */
-  .search-box {
-    display: flex; align-items: center; gap: 6px; background: #f5f5f5;
-    border: 1.5px solid #e0e0e0; border-radius: 20px; padding: 6px 12px; margin-bottom: 4px;
-  }
+  .search-box { display: flex; align-items: center; gap: 6px; background: #f5f5f5; border: 1.5px solid #e0e0e0; border-radius: 20px; padding: 6px 12px; margin-bottom: 4px; }
   .search-box i { color: #999; font-size: 12px; }
   .search-box input { border: none; background: none; outline: none; font-size: 12px; width: 100%; }
 
-  /* MAP */
+  .filter-bar { display: flex; gap: 6px; flex-wrap: wrap; }
+  .filter-btn { padding: 4px 10px; border-radius: 20px; border: 1.5px solid #e0e0e0; background: white; font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.2s; color: #666; }
+  .filter-btn.active { background: #1565c0; color: white; border-color: #1565c0; }
+
   #map { flex: 1; }
 
-  /* POPUP */
-  .custom-popup .leaflet-popup-content-wrapper {
-    border-radius: 10px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); padding: 0; overflow: hidden;
-  }
-  .custom-popup .leaflet-popup-content { margin: 0; min-width: 220px; }
+  .custom-popup .leaflet-popup-content-wrapper { border-radius: 10px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); padding: 0; overflow: hidden; }
+  .custom-popup .leaflet-popup-content { margin: 0; min-width: 240px; }
   .popup-header { padding: 10px 14px; color: white; font-weight: 700; font-size: 14px; }
   .popup-body { padding: 10px 14px; }
   .popup-row { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 6px; font-size: 12px; color: #444; }
   .popup-row i { color: #1565c0; width: 14px; flex-shrink: 0; margin-top: 1px; }
   .popup-actions { padding: 8px 14px; border-top: 1px solid #eee; display: flex; gap: 6px; }
-  .popup-btn {
-    flex: 1; padding: 6px; border: none; border-radius: 6px; cursor: pointer;
-    font-size: 11px; font-weight: 600; transition: all 0.2s;
-  }
+  .popup-btn { flex: 1; padding: 6px; border: none; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: 600; transition: all 0.2s; }
   .popup-btn-add { background: #1565c0; color: white; }
   .popup-btn-add:hover { background: #0d47a1; }
   .popup-btn-remove { background: #ffebee; color: #e53935; }
   .popup-btn-remove:hover { background: #e53935; color: white; }
 
-  /* FILTER BAR */
-  .filter-bar {
-    display: flex; gap: 6px; padding: 8px 12px; background: white;
-    border-bottom: 1px solid #e0e0e0; flex-wrap: wrap; flex-shrink: 0;
-  }
-  .filter-btn {
-    padding: 4px 10px; border-radius: 20px; border: 1.5px solid #e0e0e0;
-    background: white; font-size: 11px; font-weight: 600; cursor: pointer;
-    transition: all 0.2s; color: #666;
-  }
-  .filter-btn.active { background: #1565c0; color: white; border-color: #1565c0; }
-  .filter-btn:hover { border-color: #1565c0; color: #1565c0; }
+  .status-badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 700; text-transform: uppercase; }
+  .status-ativo { background: #e8f5e9; color: #2e7d32; }
+  .status-em_estudo { background: #fff8e1; color: #f57f17; }
+  .status-inativo { background: #ffebee; color: #c62828; }
 
-  /* TOAST */
-  .toast {
-    position: fixed; bottom: 20px; right: 20px; background: #0d47a1; color: white;
-    padding: 10px 18px; border-radius: 8px; font-size: 13px; font-weight: 600;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.3); z-index: 9999;
-    transform: translateY(100px); opacity: 0; transition: all 0.3s;
+  .loading-overlay {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(10,39,68,0.85); display: flex; flex-direction: column;
+    align-items: center; justify-content: center; z-index: 9999; color: white;
   }
+  .loading-spinner { width: 50px; height: 50px; border: 4px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 16px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-text { font-size: 16px; font-weight: 600; }
+  .loading-sub { font-size: 12px; opacity: 0.7; margin-top: 6px; }
+
+  .toast { position: fixed; bottom: 20px; right: 20px; background: #0d47a1; color: white; padding: 10px 18px; border-radius: 8px; font-size: 13px; font-weight: 600; box-shadow: 0 4px 15px rgba(0,0,0,0.3); z-index: 9999; transform: translateY(100px); opacity: 0; transition: all 0.3s; }
   .toast.show { transform: translateY(0); opacity: 1; }
 
-  /* SCROLLBAR */
+  .no-geo { background: #fff8e1; border-color: #f57f17 !important; }
+  .no-geo-badge { font-size: 10px; color: #f57f17; font-weight: 600; }
+
   ::-webkit-scrollbar { width: 5px; }
   ::-webkit-scrollbar-track { background: #f1f1f1; }
   ::-webkit-scrollbar-thumb { background: #b0c4de; border-radius: 3px; }
 
-  .divider { height: 1px; background: #e0e0e0; margin: 4px 0; }
-  .section-label { font-size: 10px; font-weight: 800; color: #999; text-transform: uppercase; letter-spacing: 0.5px; padding: 4px 0 2px; }
+  .refresh-btn { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 5px 12px; border-radius: 20px; cursor: pointer; font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 5px; transition: all 0.2s; }
+  .refresh-btn:hover { background: rgba(255,255,255,0.25); }
 </style>
 </head>
 <body>
 
+<!-- LOADING -->
+<div class="loading-overlay" id="loading-overlay">
+  <div class="loading-spinner"></div>
+  <div class="loading-text">A carregar dados do CRM...</div>
+  <div class="loading-sub">A sincronizar com Google Sheets</div>
+</div>
+
 <!-- HEADER -->
 <div class="header">
   <div class="header-left">
-    <div class="header-logo">🐟</div>
+    <div style="font-size:22px">🐟</div>
     <div>
       <div class="header-title">Gialmar – Clientes Polónia</div>
-      <div class="header-sub">Mapa Interativo de Visitas</div>
+      <div class="header-sub" id="last-update">A carregar...</div>
     </div>
+    <div class="live-badge"><i class="fas fa-circle" style="font-size:8px"></i> LIVE</div>
   </div>
-  <div class="header-stats">
-    <div class="hstat"><div class="hstat-val" id="stat-total">27</div><div class="hstat-lbl">Clientes</div></div>
-    <div class="hstat"><div class="hstat-val" id="stat-a" style="color:#ff8a80">0</div><div class="hstat-lbl">Prior. A</div></div>
-    <div class="hstat"><div class="hstat-val" id="stat-b" style="color:#ffcc80">0</div><div class="hstat-lbl">Prior. B</div></div>
-    <div class="hstat"><div class="hstat-val" id="stat-c" style="color:#a5d6a7">0</div><div class="hstat-lbl">Prior. C</div></div>
-    <div class="hstat"><div class="hstat-val" id="stat-route" style="color:#80cbc4">0</div><div class="hstat-lbl">Na Rota</div></div>
+  <div style="display:flex;align-items:center;gap:16px">
+    <div class="header-stats">
+      <div class="hstat"><div class="hstat-val" id="stat-total">-</div><div class="hstat-lbl">Clientes</div></div>
+      <div class="hstat"><div class="hstat-val" id="stat-a" style="color:#ff8a80">-</div><div class="hstat-lbl">Prior. A</div></div>
+      <div class="hstat"><div class="hstat-val" id="stat-b" style="color:#ffcc80">-</div><div class="hstat-lbl">Prior. B</div></div>
+      <div class="hstat"><div class="hstat-val" id="stat-c" style="color:#a5d6a7">-</div><div class="hstat-lbl">Prior. C</div></div>
+      <div class="hstat"><div class="hstat-val" id="stat-route" style="color:#80cbc4">0</div><div class="hstat-lbl">Na Rota</div></div>
+    </div>
+    <button class="refresh-btn" onclick="loadData()"><i class="fas fa-sync-alt"></i> Atualizar</button>
   </div>
 </div>
 
 <!-- MAIN -->
 <div class="main">
-
-  <!-- SIDEBAR -->
   <div class="sidebar">
     <div class="sidebar-tabs">
       <button class="tab-btn active" onclick="switchTab('contacts')" id="tab-contacts">
@@ -249,27 +216,26 @@
       </button>
     </div>
 
-    <!-- CONTACTS TAB -->
     <div class="tab-content active" id="tab-content-contacts">
       <div class="search-box">
         <i class="fas fa-search"></i>
-        <input type="text" id="search-input" placeholder="Pesquisar empresa ou cidade..." oninput="filterContacts()"/>
+        <input type="text" id="search-input" placeholder="Pesquisar empresa ou cidade..." oninput="renderContactsList()"/>
       </div>
-      <div class="filter-bar" style="padding:0;border:none;background:none;">
-        <button class="filter-btn active" onclick="setFilter('all', this)">Todos</button>
-        <button class="filter-btn" onclick="setFilter('A', this)" style="border-color:#e53935;color:#e53935">● A</button>
-        <button class="filter-btn" onclick="setFilter('B', this)" style="border-color:#fb8c00;color:#fb8c00">● B</button>
-        <button class="filter-btn" onclick="setFilter('C', this)" style="border-color:#43a047;color:#43a047">● C</button>
+      <div class="filter-bar">
+        <button class="filter-btn active" onclick="setFilter('all',this)">Todos</button>
+        <button class="filter-btn" onclick="setFilter('A',this)" style="border-color:#e53935;color:#e53935">● A</button>
+        <button class="filter-btn" onclick="setFilter('B',this)" style="border-color:#fb8c00;color:#fb8c00">● B</button>
+        <button class="filter-btn" onclick="setFilter('C',this)" style="border-color:#43a047;color:#43a047">● C</button>
+        <button class="filter-btn" onclick="setFilter('nogeo',this)" style="border-color:#f57f17;color:#f57f17">⚠ Sem GPS</button>
       </div>
       <div id="contacts-list"></div>
     </div>
 
-    <!-- ROUTE TAB -->
     <div class="tab-content" id="tab-content-route">
       <div class="route-panel">
         <div class="route-header"><i class="fas fa-route" style="color:#1565c0"></i> Planeador de Rota</div>
         <div id="route-stops-list">
-          <div class="route-empty" id="route-empty-msg">
+          <div class="route-empty">
             <i class="fas fa-map-marked-alt"></i>
             Adicione clientes à rota clicando nos marcadores ou nos botões "+ Rota"
           </div>
@@ -292,151 +258,169 @@
       </div>
     </div>
 
-    <!-- LEGEND -->
     <div class="legend">
       <div class="legend-title">Legenda</div>
       <div class="legend-items">
         <div class="legend-item"><div class="legend-dot" style="background:#e53935"></div> Prioridade A</div>
         <div class="legend-item"><div class="legend-dot" style="background:#fb8c00"></div> Prioridade B</div>
         <div class="legend-item"><div class="legend-dot" style="background:#43a047"></div> Prioridade C</div>
-        <div class="legend-item"><div class="legend-dot" style="background:#1565c0;border:2px solid white;box-shadow:0 0 0 2px #1565c0"></div> Na Rota</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#1565c0"></div> Na Rota</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#f57f17"></div> Sem GPS</div>
       </div>
     </div>
   </div>
 
-  <!-- MAP -->
   <div id="map"></div>
 </div>
 
-<!-- TOAST -->
 <div class="toast" id="toast"></div>
 
 <script>
-// ===== DATA =====
-const CONTACTS = [{"id": 1, "priority": "A", "company": "Abramczyk", "country": "Poland", "city": "Bydgoszcz", "email": "sekretariat@abramczyk.pl / n.kryze@abramczyk.pl", "website": "https://abramczyk.pl/", "phone": "+48 52 344 56 77 / +48 609 120 135", "notes": "Leading frozen fish producer/distributor\n  sells to major chains and wholesalers.\n mention certifications and ask for category manager.", "next_step": "", "status": "em_estudo", "lat": 53.1235, "lon": 18.0084, "city_resolved": "Bydgoszcz"}, {"id": 2, "priority": "A", "company": "PW Waldi", "country": "Poland", "city": "Kościan", "email": "", "website": "https://pwwaldi.com.pl/", "phone": "+48 65 512 2780", "notes": "Importer/distributor of frozen fish and seafood\n B2B and wholesale focus.\nOffer stable supply", "next_step": "", "status": "em_estudo", "lat": 52.0833, "lon": 16.65, "city_resolved": "Kościan"}, {"id": 3, "priority": "A", "company": "Kuchnie Świata", "country": "Poland", "city": "Czosnów / Warszawa", "email": "zamowienie@kuchnieswiata.com.pl; iodo@kuchnieswiata.com.pl; b2b@kuchnieswiata.com.pl", "website": "https://www.kuchnieswiata.com.pl/en/ryby-mrozone/", "phone": "+48 22 785 95 20 / +48 507 012 094", "notes": "National frozen-fish distributor with broad B2B warehouse.\nLead with assortment breadth and service levels\n propose a test SKU list.", "next_step": "", "status": "em_estudo", "lat": 52.3667, "lon": 20.7833, "city_resolved": "Czosnów / Warszawa"}, {"id": 4, "priority": "A", "company": "Tahami Fish", "country": "Poland", "city": "", "email": "dystrybucja@tahami.pl; i.suchodolski@tahami.pl; s.piotrowski@tahami.pl; k.badurowicz@tahami.pl", "website": "tahami.pl", "phone": "", "notes": "Importer/distributor with wholesale and horeca reach.\nUse premium positioning and service reliability\n request the buying desk contact.", "next_step": "", "status": "em_estudo", "lat": 52.2297, "lon": 21.0122, "city_resolved": "Warszawa"}, {"id": 5, "priority": "A", "company": "Family Fish / Nord Capital", "country": "Poland", "city": "", "email": "ezadrozna@nordcapital.com.pl", "website": "ezadrozna@nordcapital.com.pl", "phone": "", "notes": "Producer/distributor of frozen fish\n seafood and ready meals.\nPosition as raw material supplier for industrial lines and private label.", "next_step": "", "status": "em_estudo", "lat": 54.352, "lon": 18.6466, "city_resolved": "Gdańsk"}, {"id": 6, "priority": "A", "company": "Mare Foods", "country": "Poland", "city": "", "email": "", "website": "", "phone": "", "notes": "Importer/wholesaler profile\n glazing and MOQ.\n good match for frozen seafood trade.\nOpen with core assortment", "next_step": "", "status": "em_estudo", "lat": 52.2297, "lon": 21.0122, "city_resolved": "Warszawa"}, {"id": 7, "priority": "A", "company": "Castelmar", "country": "Poland", "city": "", "email": "", "website": "", "phone": "", "notes": "Seafood importer and distributor.\nSuggest a commercial meeting focused on frozen fish assortment.", "next_step": "", "status": "em_estudo", "lat": 54.5189, "lon": 18.5305, "city_resolved": "Gdynia"}, {"id": 8, "priority": "B", "company": "DNHS Poland", "country": "Poland", "city": "", "email": "", "website": "", "phone": "", "notes": "Multi-product wholesaler/importer.\nProbe whether frozen fish is already in the buying matrix.", "next_step": "", "status": "em_estudo", "lat": 52.2297, "lon": 21.0122, "city_resolved": "Warszawa"}, {"id": 9, "priority": "B", "company": "Eurofish", "country": "Poland", "city": "", "email": "info@eurofish.pl", "website": "", "phone": "", "notes": "Importer/wholesaler.\nSend concise company intro and product sheet.", "next_step": "", "status": "em_estudo", "lat": 54.352, "lon": 18.6466, "city_resolved": "Gdańsk"}, {"id": 10, "priority": "B", "company": "Morex", "country": "Poland", "city": "", "email": "", "website": "", "phone": "", "notes": "Trading / wholesale fit.\nAsk what species and formats they buy most often.", "next_step": "", "status": "em_estudo", "lat": 52.4064, "lon": 16.9252, "city_resolved": "Poznań"}, {"id": 11, "priority": "B", "company": "Polseafood", "country": "Poland", "city": "", "email": "", "website": "", "phone": "", "notes": "Frozen pelagic fish profile.\nBest angle is price-competitive regular supply.", "next_step": "", "status": "em_estudo", "lat": 54.5189, "lon": 18.5305, "city_resolved": "Gdynia"}, {"id": 12, "priority": "B", "company": "Unifood", "country": "Poland", "city": "", "email": "handlowy@unifood.com.pl; magda@unifoodandwine.pl", "website": "", "phone": "", "notes": "White-fish fillets.\nLead with fillet specs", "next_step": "", "status": "em_estudo", "lat": 52.2297, "lon": 21.0122, "city_resolved": "Warszawa"}, {"id": 13, "priority": "B", "company": "Intersea", "country": "Poland", "city": "", "email": "", "website": "", "phone": "", "notes": "Processing / packing.\nAsk if they source raw material for processing.", "next_step": "", "status": "em_estudo", "lat": 53.4285, "lon": 14.5528, "city_resolved": "Szczecin"}, {"id": 14, "priority": "B", "company": "Seamor International", "country": "Poland", "city": "", "email": "mp@seamor.com.pl", "website": "", "phone": "", "notes": "Import / distribution.\nGood for a general B2B intro and product range email.", "next_step": "", "status": "em_estudo", "lat": 54.352, "lon": 18.6466, "city_resolved": "Gdańsk"}, {"id": 15, "priority": "B", "company": "J.P. Klausen Polska", "country": "Poland", "city": "Szczecin", "email": "martijn.broekhoven@jpklausen.com", "website": "", "phone": "", "notes": "International seafood trader.\nAim for relationship-building and source diversification.", "next_step": "", "status": "em_estudo", "lat": 53.4285, "lon": 14.5528, "city_resolved": "Szczecin"}, {"id": 16, "priority": "B", "company": "Impexryb", "country": "Poland", "city": "", "email": "", "website": "", "phone": "", "notes": "Import / wholesale.\nSend a frozen-fish catalogue and ask for purchasing criteria.", "next_step": "", "status": "em_estudo", "lat": 54.352, "lon": 18.6466, "city_resolved": "Gdańsk"}, {"id": 17, "priority": "C", "company": "Luxfish", "country": "Poland", "city": "", "email": "", "website": "", "phone": "", "notes": "Seafood wholesale.\nUse as secondary target after the main importers.", "next_step": "", "status": "em_estudo", "lat": 52.2297, "lon": 21.0122, "city_resolved": "Warszawa"}, {"id": 18, "priority": "C", "company": "Pescanova Polska", "country": "Poland", "city": "", "email": "", "website": "", "phone": "", "notes": "Frozen fish distribution.\nCheck whether they need additional sourcing capacity.", "next_step": "", "status": "em_estudo", "lat": 52.2297, "lon": 21.0122, "city_resolved": "Warszawa"}, {"id": 19, "priority": "C", "company": "Apol", "country": "Poland", "city": "", "email": "", "website": "", "phone": "", "notes": "Frozen fillets.\nFocus on standardised fillets and price tiers.", "next_step": "", "status": "em_estudo", "lat": 54.5189, "lon": 18.5305, "city_resolved": "Gdynia"}, {"id": 20, "priority": "C", "company": "Canada Trading", "country": "Poland", "city": "", "email": "", "website": "", "phone": "", "notes": "Input for processing.\nAsk about preferred species and specifications.", "next_step": "", "status": "em_estudo", "lat": 52.2297, "lon": 21.0122, "city_resolved": "Warszawa"}, {"id": 21, "priority": "C", "company": "Frosalfish", "country": "Poland", "city": "", "email": "", "website": "", "phone": "", "notes": "Pelagic frozen fish.\nUse a competitive supply and availability angle.", "next_step": "", "status": "em_estudo", "lat": 54.352, "lon": 18.6466, "city_resolved": "Gdańsk"}, {"id": 22, "priority": "C", "company": "South Baltic Foods", "country": "Poland", "city": "", "email": "", "website": "", "phone": "", "notes": "Pelagic frozen fish.\nAsk if they buy spot or under contract.", "next_step": "", "status": "em_estudo", "lat": 54.352, "lon": 18.6466, "city_resolved": "Gdańsk"}, {"id": 23, "priority": "C", "company": "Espersen Polska", "country": "Poland", "city": "", "email": "praca@espersen.com", "website": "", "phone": "", "notes": "Cod / white fish processor.\nApproach with technical specs and supply reliability.", "next_step": "", "status": "em_estudo", "lat": 54.5189, "lon": 18.5305, "city_resolved": "Gdynia"}, {"id": 24, "priority": "C", "company": "Kołobrzeska GP Ryb", "country": "Poland", "city": "Kołobrzeg", "email": "", "website": "", "phone": "", "notes": "Baltic fish / logistics.\nCould be a logistics or local sourcing partner.", "next_step": "", "status": "em_estudo", "lat": 54.1776, "lon": 15.5716, "city_resolved": "Kołobrzeg"}, {"id": 25, "priority": "C", "company": "Lodom", "country": "Poland", "city": "", "email": "", "website": "", "phone": "", "notes": "Cold chain.\nUse only if you want cold-storage or distribution contacts.", "next_step": "", "status": "em_estudo", "lat": 51.7592, "lon": 19.456, "city_resolved": "Łódź"}, {"id": 26, "priority": "C", "company": "Chłodnia Szczecińska", "country": "Poland", "city": "Szczecin", "email": "mgarnys@chlodniaszczecinska.pl", "website": "", "phone": "", "notes": "Cold chain.\nUse only if you want cold-storage or distribution contacts.", "next_step": "", "status": "em_estudo", "lat": 53.4285, "lon": 14.5528, "city_resolved": "Szczecin"}, {"id": 27, "priority": "C", "company": "PPU Port Rybacki Gryf", "country": "Poland", "city": "Szczecin", "email": "", "website": "", "phone": "", "notes": "Cold chain.\nUse only if you want cold-storage or distribution contacts.", "next_step": "", "status": "em_estudo", "lat": 53.4285, "lon": 14.5528, "city_resolved": "Szczecin"}];
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyWCvCt36e-oLl-elonsegSa2lNxW_T8giCKmMzt1vbcVoytRy_IWlMpupRbnipx5gG/exec";
+
+const CITY_COORDS = {"szczecin": [53.4285, 14.5528], "70-644 szczecin": [53.4285, 14.5528], "70-651 szczecin": [53.4285, 14.5528], "70-205 szczecin": [53.4285, 14.5528], "70-462 szczecin": [53.4285, 14.5528], "70-846 szczecin": [53.4285, 14.5528], "gdańsk": [54.352, 18.6466], "gdansk": [54.352, 18.6466], "gdynia": [54.5189, 18.5305], "warszawa": [52.2297, 21.0122], "warsaw": [52.2297, 21.0122], "00-693 warszawa": [52.2297, 21.0122], "00-120 warszawa": [52.2297, 21.0122], "bydgoszcz": [53.1235, 18.0084], "kościan": [52.0833, 16.65], "64-000 kościan": [52.0833, 16.65], "czosnów / warszawa": [52.3667, 20.7833], "poznań": [52.4064, 16.9252], "kołobrzeg": [54.1776, 15.5716], "78-100 kołobrzeg": [54.1776, 15.5716], "słupsk": [54.4641, 17.0285], "76-202 słupsk 2": [54.4641, 17.0285], "slupsk": [54.4641, 17.0285], "nowy sącz": [49.6237, 20.6948], "33-300 nowy sącz": [49.6237, 20.6948], "05-850 ożarów mazowiecki": [52.2, 20.8], "42-202 częstochowa": [50.8118, 19.1203], "41-503 chorzów": [50.2965, 18.9543], "76-004 sianów": [54.2333, 16.2833], "62-200 gniezno": [52.5347, 17.5826], "05-807 podkowa leśna": [52.1167, 20.7167], "87-100  toruń": [53.0138, 18.5984], "11-700 mrągowo": [53.8667, 21.3], "81-198 mosty": [54.55, 18.45], "42-350 koziegłowy": [50.6167, 19.1333], "84-250 gniewino": [54.6833, 18.2167], "75 - 511 koszalin": [54.1943, 16.1722], "goleniów": [53.5667, 14.8333], "stargard": [53.3333, 15.05], "jarocin": [51.9667, 17.5], "63-200 jarocin": [51.9667, 17.5], "gniewino": [54.6833, 18.2167], "łebcz": [54.7167, 18.3], "rytel": [53.75, 17.75], "bochnia": [49.9667, 20.4333], "32-700 bochnia": [49.9667, 20.4333], "władysławowo": [54.7833, 18.4167], "puck": [54.7167, 18.4], "wejherowo": [54.6, 18.2333], "84-200 wejherowo": [54.6, 18.2333], "maszewo": [53.4833, 14.9167], "sopot": [54.4418, 18.5601], "trzebiatów": [54.0667, 15.2667], "jaraczewo": [51.9, 17.5333], "chojnice": [53.6964, 17.5567], "89-620 chojnice": [53.6964, 17.5567], "lędziny": [50.1333, 19.0], "brusy": [53.8833, 17.7167]};
 
 const PRIORITY_COLORS = { "A": "#e53935", "B": "#fb8c00", "C": "#43a047" };
-const PRIORITY_ICONS = { "A": "⭐", "B": "🔶", "C": "🟢" };
 
+let CONTACTS = [];
 let routeStops = [];
 let routingControl = null;
 let markers = {};
 let currentFilter = 'all';
 let map;
 
+// ===== GEOCODE =====
+function getCoords(cityRaw) {
+  if (!cityRaw) return null;
+  const city = cityRaw.trim().toLowerCase();
+  if (CITY_COORDS[city]) return CITY_COORDS[city];
+  for (const [key, coords] of Object.entries(CITY_COORDS)) {
+    if (city.includes(key) || key.includes(city)) return coords;
+  }
+  // Try extract city from postal code
+  const m = city.match(/^[\d\-]+\s+(.+)/);
+  if (m && CITY_COORDS[m[1].trim()]) return CITY_COORDS[m[1].trim()];
+  return null;
+}
+
+// ===== LOAD DATA FROM CRM =====
+async function loadData() {
+  document.getElementById('loading-overlay').style.display = 'flex';
+  try {
+    const resp = await fetch(APPS_SCRIPT_URL + '?action=getContacts');
+    const data = await resp.json();
+    const poland = data.filter(c => (c.country||'').toLowerCase() === 'poland');
+
+    // Add coords
+    poland.forEach(c => {
+      const coords = getCoords(c.city);
+      c.lat = coords ? coords[0] : null;
+      c.lon = coords ? coords[1] : null;
+      c.city_resolved = c.city || '';
+    });
+
+    CONTACTS = poland;
+
+    // Clear existing markers
+    Object.values(markers).forEach(m => map.removeLayer(m));
+    markers = {};
+
+    // Add new markers
+    CONTACTS.forEach(c => { if (c.lat && c.lon) addMarker(c); });
+
+    updateStats();
+    renderContactsList();
+
+    const now = new Date();
+    document.getElementById('last-update').textContent =
+      `Atualizado: ${now.toLocaleTimeString('pt-PT')} · ${poland.length} clientes`;
+
+    showToast(`✅ ${poland.length} clientes carregados do CRM`);
+  } catch(e) {
+    showToast('⚠️ Erro ao carregar dados: ' + e.message);
+    console.error(e);
+  } finally {
+    document.getElementById('loading-overlay').style.display = 'none';
+  }
+}
+
 // ===== MAP INIT =====
 function initMap() {
   map = L.map('map', { zoomControl: true }).setView([52.5, 19.0], 6);
-
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
     maxZoom: 18
   }).addTo(map);
-
-  // Add markers
-  CONTACTS.forEach(c => {
-    if (c.lat && c.lon) {
-      addMarker(c);
-    }
-  });
-
-  updateStats();
-  renderContactsList();
+  loadData();
 }
 
-// ===== CUSTOM MARKER =====
+// ===== MARKER =====
 function createMarkerIcon(contact, inRoute) {
   const color = inRoute ? '#1565c0' : (PRIORITY_COLORS[contact.priority] || '#666');
   const routeIdx = routeStops.findIndex(s => s.id === contact.id);
-  const label = inRoute && routeIdx >= 0 ? (routeIdx + 1) : contact.priority;
+  const label = inRoute && routeIdx >= 0 ? (routeIdx + 1) : (contact.priority || '?');
   const size = contact.priority === 'A' ? 36 : (contact.priority === 'B' ? 32 : 28);
-
   return L.divIcon({
     className: '',
-    html: `<div style="
-      width:${size}px;height:${size}px;border-radius:50% 50% 50% 0;
-      background:${color};border:2.5px solid white;
-      box-shadow:0 2px 8px rgba(0,0,0,0.35);
-      display:flex;align-items:center;justify-content:center;
-      color:white;font-weight:800;font-size:${size > 32 ? 13 : 11}px;
-      transform:rotate(-45deg);cursor:pointer;
-      transition:all 0.2s;
-    "><span style="transform:rotate(45deg)">${label}</span></div>`,
-    iconSize: [size, size],
-    iconAnchor: [size/2, size],
-    popupAnchor: [0, -size]
+    html: `<div style="width:${size}px;height:${size}px;border-radius:50% 50% 50% 0;background:${color};border:2.5px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.35);display:flex;align-items:center;justify-content:center;color:white;font-weight:800;font-size:${size>32?13:11}px;transform:rotate(-45deg);cursor:pointer;"><span style="transform:rotate(45deg)">${label}</span></div>`,
+    iconSize: [size, size], iconAnchor: [size/2, size], popupAnchor: [0, -size]
   });
 }
 
-// ===== ADD MARKER =====
 function addMarker(contact) {
   const inRoute = routeStops.some(s => s.id === contact.id);
-  const icon = createMarkerIcon(contact, inRoute);
-
-  const marker = L.marker([contact.lat, contact.lon], { icon })
+  const marker = L.marker([contact.lat, contact.lon], { icon: createMarkerIcon(contact, inRoute) })
     .addTo(map)
-    .bindPopup(() => createPopupContent(contact), {
-      className: 'custom-popup',
-      maxWidth: 280
-    });
-
-  marker.on('click', () => {
-    marker.openPopup();
-    highlightCard(contact.id);
-  });
-
+    .bindPopup(() => createPopupContent(contact), { className: 'custom-popup', maxWidth: 300 });
+  marker.on('click', () => { marker.openPopup(); highlightCard(contact.id); });
   markers[contact.id] = marker;
 }
 
-// ===== POPUP CONTENT =====
 function createPopupContent(contact) {
   const color = PRIORITY_COLORS[contact.priority] || '#666';
   const inRoute = routeStops.some(s => s.id === contact.id);
+  const statusClass = `status-${contact.status || 'em_estudo'}`;
   const div = document.createElement('div');
   div.innerHTML = `
     <div class="popup-header" style="background:${color}">
-      ${contact.priority ? `<span style="background:rgba(255,255,255,0.2);padding:2px 7px;border-radius:10px;font-size:11px;margin-right:6px">P.${contact.priority}</span>` : ''}
+      <span style="background:rgba(255,255,255,0.2);padding:2px 7px;border-radius:10px;font-size:11px;margin-right:6px">P.${contact.priority}</span>
       ${contact.company}
     </div>
     <div class="popup-body">
-      <div class="popup-row"><i class="fas fa-map-marker-alt"></i><span>${contact.city_resolved || contact.city || 'N/D'}</span></div>
+      <div class="popup-row"><i class="fas fa-map-marker-alt"></i><span>${contact.city_resolved || 'N/D'}</span></div>
+      ${contact.status ? `<div class="popup-row"><i class="fas fa-circle"></i><span class="status-badge ${statusClass}">${contact.status}</span></div>` : ''}
       ${contact.phone ? `<div class="popup-row"><i class="fas fa-phone"></i><span>${contact.phone}</span></div>` : ''}
-      ${contact.email ? `<div class="popup-row"><i class="fas fa-envelope"></i><span style="word-break:break-all">${contact.email}</span></div>` : ''}
+      ${contact.email ? `<div class="popup-row"><i class="fas fa-envelope"></i><span style="word-break:break-all;font-size:11px">${contact.email}</span></div>` : ''}
       ${contact.website ? `<div class="popup-row"><i class="fas fa-globe"></i><a href="${contact.website}" target="_blank" style="color:#1565c0">${contact.website.replace('https://','').replace('http://','')}</a></div>` : ''}
-      ${contact.notes ? `<div class="popup-row"><i class="fas fa-sticky-note"></i><span style="font-size:11px;color:#666">${contact.notes.substring(0,100)}${contact.notes.length>100?'...':''}</span></div>` : ''}
+      ${contact.next_step ? `<div class="popup-row"><i class="fas fa-arrow-right"></i><span style="font-size:11px;color:#1565c0;font-weight:600">${contact.next_step}</span></div>` : ''}
+      ${contact.notes ? `<div class="popup-row"><i class="fas fa-sticky-note"></i><span style="font-size:11px;color:#666">${contact.notes.substring(0,120)}${contact.notes.length>120?'...':''}</span></div>` : ''}
     </div>
     <div class="popup-actions">
       ${inRoute
         ? `<button class="popup-btn popup-btn-remove" onclick="removeFromRoute(${contact.id});map.closePopup()"><i class="fas fa-minus"></i> Remover da Rota</button>`
         : `<button class="popup-btn popup-btn-add" onclick="addToRoute(${contact.id});map.closePopup()"><i class="fas fa-plus"></i> Adicionar à Rota</button>`
       }
-    </div>
-  `;
+    </div>`;
   return div;
 }
 
-// ===== ROUTE MANAGEMENT =====
+// ===== ROUTE =====
 function addToRoute(id) {
   const contact = CONTACTS.find(c => c.id === id);
   if (!contact || routeStops.some(s => s.id === id)) return;
+  if (!contact.lat) { showToast('⚠️ Este cliente não tem localização GPS'); return; }
   routeStops.push(contact);
-  updateMarker(id);
-  renderRouteStops();
-  renderContactsList();
-  updateStats();
+  updateMarker(id); renderRouteStops(); renderContactsList(); updateStats();
   showToast(`✅ ${contact.company} adicionado à rota`);
   switchTab('route');
 }
 
 function removeFromRoute(id) {
   routeStops = routeStops.filter(s => s.id !== id);
-  updateMarker(id);
-  renderRouteStops();
-  renderContactsList();
-  updateStats();
+  updateMarker(id); renderRouteStops(); renderContactsList(); updateStats();
   if (routingControl) { map.removeControl(routingControl); routingControl = null; }
   document.getElementById('route-info-box').style.display = 'none';
-  showToast(`❌ Removido da rota`);
+  showToast('❌ Removido da rota');
 }
 
 function updateMarker(id) {
@@ -453,23 +437,14 @@ function clearRoute() {
   ids.forEach(id => updateMarker(id));
   if (routingControl) { map.removeControl(routingControl); routingControl = null; }
   document.getElementById('route-info-box').style.display = 'none';
-  renderRouteStops();
-  renderContactsList();
-  updateStats();
+  renderRouteStops(); renderContactsList(); updateStats();
   showToast('🗑️ Rota limpa');
 }
 
 function selectAllA() {
   const aContacts = CONTACTS.filter(c => c.priority === 'A' && c.lat && c.lon);
-  aContacts.forEach(c => {
-    if (!routeStops.some(s => s.id === c.id)) {
-      routeStops.push(c);
-      updateMarker(c.id);
-    }
-  });
-  renderRouteStops();
-  renderContactsList();
-  updateStats();
+  aContacts.forEach(c => { if (!routeStops.some(s => s.id === c.id)) { routeStops.push(c); updateMarker(c.id); } });
+  renderRouteStops(); renderContactsList(); updateStats();
   showToast(`⭐ ${aContacts.length} clientes Prioridade A adicionados`);
   switchTab('route');
 }
@@ -478,74 +453,43 @@ function moveStop(idx, dir) {
   const newIdx = idx + dir;
   if (newIdx < 0 || newIdx >= routeStops.length) return;
   [routeStops[idx], routeStops[newIdx]] = [routeStops[newIdx], routeStops[idx]];
-  renderRouteStops();
-  // Update all route markers
   routeStops.forEach(s => updateMarker(s.id));
+  renderRouteStops();
 }
 
-// ===== CALCULATE ROUTE =====
 function calculateRoute() {
   if (routeStops.length < 2) { showToast('⚠️ Adicione pelo menos 2 clientes à rota'); return; }
   if (routingControl) { map.removeControl(routingControl); routingControl = null; }
-
   const waypoints = routeStops.map(s => L.latLng(s.lat, s.lon));
-
   routingControl = L.Routing.control({
-    waypoints: waypoints,
-    routeWhileDragging: false,
-    addWaypoints: false,
-    draggableWaypoints: false,
-    fitSelectedRoutes: true,
-    show: false,
-    lineOptions: {
-      styles: [{ color: '#1565c0', weight: 4, opacity: 0.8 }]
-    },
+    waypoints, routeWhileDragging: false, addWaypoints: false,
+    draggableWaypoints: false, fitSelectedRoutes: true, show: false,
+    lineOptions: { styles: [{ color: '#1565c0', weight: 4, opacity: 0.8 }] },
     createMarker: function() { return null; }
   }).addTo(map);
-
   routingControl.on('routesfound', function(e) {
     const route = e.routes[0];
     const dist = (route.summary.totalDistance / 1000).toFixed(0);
     const time = Math.round(route.summary.totalTime / 60);
-    const hours = Math.floor(time / 60);
-    const mins = time % 60;
+    const hours = Math.floor(time / 60), mins = time % 60;
     const timeStr = hours > 0 ? `${hours}h ${mins}min` : `${mins} min`;
-
     document.getElementById('ri-stops').textContent = routeStops.length;
     document.getElementById('ri-dist').textContent = `${dist} km`;
     document.getElementById('ri-time').textContent = timeStr;
     document.getElementById('route-info-box').style.display = 'block';
-    showToast(`🗺️ Rota calculada: ${dist} km, ${timeStr}`);
+    showToast(`🗺️ Rota: ${dist} km, ${timeStr}`);
   });
-
-  routingControl.on('routingerror', function() {
-    showToast('⚠️ Erro ao calcular rota. Verifique a ligação.');
-  });
+  routingControl.on('routingerror', () => showToast('⚠️ Erro ao calcular rota'));
 }
 
-// ===== OPTIMIZE ROUTE (Nearest Neighbor) =====
 function optimizeRoute() {
-  if (routeStops.length < 3) { showToast('⚠️ Adicione pelo menos 3 clientes para otimizar'); return; }
-
-  function dist(a, b) {
-    const dx = a.lat - b.lat, dy = a.lon - b.lon;
-    return Math.sqrt(dx*dx + dy*dy);
-  }
-
-  // Nearest neighbor starting from first stop
-  let remaining = [...routeStops.slice(1)];
-  let optimized = [routeStops[0]];
-  let current = routeStops[0];
-
+  if (routeStops.length < 3) { showToast('⚠️ Adicione pelo menos 3 clientes'); return; }
+  const dist = (a, b) => Math.sqrt((a.lat-b.lat)**2 + (a.lon-b.lon)**2);
+  let remaining = [...routeStops.slice(1)], optimized = [routeStops[0]], current = routeStops[0];
   while (remaining.length > 0) {
-    let nearest = remaining.reduce((best, c) =>
-      dist(current, c) < dist(current, best) ? c : best
-    );
-    optimized.push(nearest);
-    remaining = remaining.filter(c => c.id !== nearest.id);
-    current = nearest;
+    let nearest = remaining.reduce((best, c) => dist(current,c) < dist(current,best) ? c : best);
+    optimized.push(nearest); remaining = remaining.filter(c => c.id !== nearest.id); current = nearest;
   }
-
   routeStops = optimized;
   routeStops.forEach(s => updateMarker(s.id));
   renderRouteStops();
@@ -553,101 +497,71 @@ function optimizeRoute() {
   calculateRoute();
 }
 
-// ===== RENDER ROUTE STOPS =====
+// ===== RENDER =====
 function renderRouteStops() {
   const list = document.getElementById('route-stops-list');
-  const emptyMsg = document.getElementById('route-empty-msg');
   const actions = document.getElementById('route-actions');
   const actionsEmpty = document.getElementById('route-actions-empty');
-  const badge = document.getElementById('route-count-badge');
-
-  badge.textContent = routeStops.length;
-
+  document.getElementById('route-count-badge').textContent = routeStops.length;
   if (routeStops.length === 0) {
-    list.innerHTML = `<div class="route-empty" id="route-empty-msg">
-      <i class="fas fa-map-marked-alt"></i>
-      Adicione clientes à rota clicando nos marcadores ou nos botões "+ Rota"
-    </div>`;
-    actions.style.display = 'none';
-    actionsEmpty.style.display = 'block';
-    return;
+    list.innerHTML = `<div class="route-empty"><i class="fas fa-map-marked-alt"></i>Adicione clientes à rota clicando nos marcadores ou nos botões "+ Rota"</div>`;
+    actions.style.display = 'none'; actionsEmpty.style.display = 'block'; return;
   }
-
-  actionsEmpty.style.display = 'none';
-  actions.style.display = 'flex';
-
-  let html = '';
-  routeStops.forEach((stop, idx) => {
-    const color = PRIORITY_COLORS[stop.priority] || '#666';
-    html += `
-      <div class="route-stop">
-        <div class="stop-num" style="background:${color}">${idx + 1}</div>
-        <div class="stop-info">
-          <div class="stop-name">${stop.company}</div>
-          <div class="stop-city"><i class="fas fa-map-marker-alt" style="color:#1565c0;font-size:10px"></i> ${stop.city_resolved || stop.city || 'N/D'}</div>
-        </div>
-        <div style="display:flex;flex-direction:column;gap:2px">
-          <button class="move-btn" onclick="moveStop(${idx}, -1)" ${idx===0?'disabled':''} title="Mover para cima"><i class="fas fa-chevron-up"></i></button>
-          <button class="move-btn" onclick="moveStop(${idx}, 1)" ${idx===routeStops.length-1?'disabled':''} title="Mover para baixo"><i class="fas fa-chevron-down"></i></button>
-        </div>
-        <button class="stop-remove" onclick="removeFromRoute(${stop.id})" title="Remover"><i class="fas fa-times"></i></button>
+  actionsEmpty.style.display = 'none'; actions.style.display = 'flex';
+  list.innerHTML = routeStops.map((stop, idx) => `
+    <div class="route-stop">
+      <div class="stop-num" style="background:${PRIORITY_COLORS[stop.priority]||'#666'}">${idx+1}</div>
+      <div class="stop-info">
+        <div class="stop-name">${stop.company}</div>
+        <div class="stop-city"><i class="fas fa-map-marker-alt" style="color:#1565c0;font-size:10px"></i> ${stop.city_resolved||'N/D'}</div>
       </div>
-    `;
-  });
-  list.innerHTML = html;
+      <div style="display:flex;flex-direction:column;gap:2px">
+        <button class="move-btn" onclick="moveStop(${idx},-1)" ${idx===0?'disabled':''}><i class="fas fa-chevron-up"></i></button>
+        <button class="move-btn" onclick="moveStop(${idx},1)" ${idx===routeStops.length-1?'disabled':''}><i class="fas fa-chevron-down"></i></button>
+      </div>
+      <button class="stop-remove" onclick="removeFromRoute(${stop.id})"><i class="fas fa-times"></i></button>
+    </div>`).join('');
 }
 
-// ===== RENDER CONTACTS LIST =====
 function renderContactsList() {
   const list = document.getElementById('contacts-list');
-  const search = document.getElementById('search-input').value.toLowerCase();
-
-  let filtered = CONTACTS.filter(c => {
-    const matchFilter = currentFilter === 'all' || c.priority === currentFilter;
-    const matchSearch = !search ||
-      c.company.toLowerCase().includes(search) ||
-      (c.city_resolved || c.city || '').toLowerCase().includes(search);
-    return matchFilter && matchSearch;
+  const search = (document.getElementById('search-input').value||'').toLowerCase();
+  const filtered = CONTACTS.filter(c => {
+    if (currentFilter === 'nogeo') return !c.lat;
+    if (currentFilter !== 'all' && c.priority !== currentFilter) return false;
+    if (search && !c.company.toLowerCase().includes(search) && !(c.city_resolved||'').toLowerCase().includes(search)) return false;
+    return true;
   });
-
-  let html = '';
-  filtered.forEach(c => {
-    const color = PRIORITY_COLORS[c.priority] || '#666';
-    const inRoute = routeStops.some(s => s.id === c.id);
-    const routeIdx = routeStops.findIndex(s => s.id === c.id);
-    html += `
-      <div class="contact-card ${inRoute ? 'in-route' : ''}" id="card-${c.id}" onclick="focusContact(${c.id})">
-        ${inRoute ? `<div class="route-num">${routeIdx + 1}</div>` : ''}
-        <div class="card-header">
-          <div class="priority-badge" style="background:${color}">${c.priority}</div>
-          <div class="card-company">${c.company}</div>
-        </div>
-        <div class="card-city"><i class="fas fa-map-marker-alt"></i> ${c.city_resolved || c.city || 'Localização não definida'}</div>
-        <button class="add-route-btn ${inRoute ? 'remove' : ''}" onclick="event.stopPropagation();${inRoute ? `removeFromRoute(${c.id})` : `addToRoute(${c.id})`}">
-          <i class="fas fa-${inRoute ? 'minus' : 'plus'}"></i> ${inRoute ? 'Remover da Rota' : 'Adicionar à Rota'}
-        </button>
+  if (!filtered.length) { list.innerHTML = '<div style="text-align:center;color:#999;padding:20px;font-size:13px">Nenhum cliente encontrado</div>'; return; }
+  const inRoute = id => routeStops.some(s => s.id === id);
+  const routeIdx = id => routeStops.findIndex(s => s.id === id);
+  list.innerHTML = filtered.map(c => `
+    <div class="contact-card ${inRoute(c.id)?'in-route':''} ${!c.lat?'no-geo':''}" id="card-${c.id}" onclick="focusContact(${c.id})">
+      ${inRoute(c.id) ? `<div class="route-num">${routeIdx(c.id)+1}</div>` : ''}
+      <div class="card-header">
+        <div class="priority-badge" style="background:${PRIORITY_COLORS[c.priority]||'#999'}">${c.priority||'?'}</div>
+        <div class="card-company">${c.company}</div>
       </div>
-    `;
-  });
-
-  list.innerHTML = html || '<div style="text-align:center;color:#999;padding:20px;font-size:13px">Nenhum cliente encontrado</div>';
+      <div class="card-city"><i class="fas fa-map-marker-alt"></i> ${c.city_resolved||'Cidade não definida'} ${!c.lat?'<span class="no-geo-badge">⚠ Sem GPS</span>':''}</div>
+      <button class="add-route-btn ${inRoute(c.id)?'remove':''}" onclick="event.stopPropagation();${inRoute(c.id)?`removeFromRoute(${c.id})`:`addToRoute(${c.id})`}">
+        <i class="fas fa-${inRoute(c.id)?'minus':'plus'}"></i> ${inRoute(c.id)?'Remover da Rota':'Adicionar à Rota'}
+      </button>
+    </div>`).join('');
 }
 
-// ===== FOCUS CONTACT =====
 function focusContact(id) {
-  const contact = CONTACTS.find(c => c.id === id);
-  if (!contact || !contact.lat) return;
-  map.setView([contact.lat, contact.lon], 11, { animate: true });
+  const c = CONTACTS.find(x => x.id === id);
+  if (!c || !c.lat) { showToast('⚠️ Sem coordenadas GPS para este cliente'); return; }
+  map.setView([c.lat, c.lon], 11, { animate: true });
   if (markers[id]) markers[id].openPopup();
 }
 
 function highlightCard(id) {
   document.querySelectorAll('.contact-card').forEach(c => c.classList.remove('selected'));
   const card = document.getElementById(`card-${id}`);
-  if (card) { card.classList.add('selected'); card.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
+  if (card) { card.classList.add('selected'); card.scrollIntoView({ behavior:'smooth', block:'nearest' }); }
 }
 
-// ===== FILTER =====
 function setFilter(filter, btn) {
   currentFilter = filter;
   document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
@@ -655,9 +569,6 @@ function setFilter(filter, btn) {
   renderContactsList();
 }
 
-function filterContacts() { renderContactsList(); }
-
-// ===== TABS =====
 function switchTab(tab) {
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
@@ -665,26 +576,20 @@ function switchTab(tab) {
   document.getElementById(`tab-content-${tab}`).classList.add('active');
 }
 
-// ===== STATS =====
 function updateStats() {
-  const a = CONTACTS.filter(c => c.priority === 'A').length;
-  const b = CONTACTS.filter(c => c.priority === 'B').length;
-  const cc = CONTACTS.filter(c => c.priority === 'C').length;
-  document.getElementById('stat-a').textContent = a;
-  document.getElementById('stat-b').textContent = b;
-  document.getElementById('stat-c').textContent = cc;
+  document.getElementById('stat-total').textContent = CONTACTS.length;
+  document.getElementById('stat-a').textContent = CONTACTS.filter(c=>c.priority==='A').length;
+  document.getElementById('stat-b').textContent = CONTACTS.filter(c=>c.priority==='B').length;
+  document.getElementById('stat-c').textContent = CONTACTS.filter(c=>c.priority==='C').length;
   document.getElementById('stat-route').textContent = routeStops.length;
 }
 
-// ===== TOAST =====
 function showToast(msg) {
   const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
+  t.textContent = msg; t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 3000);
 }
 
-// ===== INIT =====
 window.onload = initMap;
 </script>
 </body>
