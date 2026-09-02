@@ -192,7 +192,36 @@ body{font-family:"Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(
 .popup-btn{flex:1;padding:6px;border:none;border-radius:6px;cursor:pointer;font-size:11px;font-weight:600;transition:all 0.2s}
 .popup-btn-add{background:#1565c0;color:white}
 .popup-btn-remove{background:#ffebee;color:#e53935}
-</style></head>
+</style><link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.min.js"></script>
+<style>
+.crm-overlay{display:none;position:fixed;top:62px;left:230px;right:0;bottom:0;z-index:150;background:white;flex-direction:column;overflow:hidden}
+.crm-overlay.active{display:flex}
+.of-container{flex:1;overflow-y:auto;background:#f0f4f5;font-family:"Segoe UI",system-ui,sans-serif;font-size:14px;color:#1a2e33}
+.of-container .page{display:none;padding:22px 26px}
+.of-container .page.active{display:block}
+.custom-popup .leaflet-popup-content-wrapper{border-radius:10px;box-shadow:0 4px 20px rgba(0,0,0,0.2);padding:0;overflow:hidden}
+.custom-popup .leaflet-popup-content{margin:0;min-width:220px}
+.popup-header{padding:10px 14px;color:white;font-weight:700;font-size:14px}
+.popup-body{padding:10px 14px}
+.popup-row{display:flex;align-items:flex-start;gap:8px;margin-bottom:6px;font-size:12px;color:#444}
+.popup-actions{padding:8px 14px;border-top:1px solid #eee;display:flex;gap:6px}
+.popup-btn{flex:1;padding:6px;border:none;border-radius:6px;cursor:pointer;font-size:11px;font-weight:600}
+.popup-btn-add{background:#1565c0;color:white}
+.popup-btn-remove{background:#ffebee;color:#e53935}
+@keyframes vpPulse{0%,100%{opacity:1}50%{opacity:0.6}}
+.vp-card{border:1.5px solid #e0e0e0;border-radius:8px;padding:9px 11px;cursor:pointer;transition:all 0.2s;background:white;position:relative;margin-bottom:6px}
+.vp-card:hover{border-color:#1565c0;box-shadow:0 2px 8px rgba(21,101,192,0.15)}
+.vp-card.in-route{border-color:#43a047;background:#e8f5e9}
+.vp-route-num{position:absolute;top:7px;right:7px;background:#1565c0;color:white;border-radius:50%;width:18px;height:18px;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.vp-filter.active{background:#1565c0!important;color:white!important;border-color:#1565c0!important}
+.cal-event{border-radius:4px;padding:2px 6px;font-size:11px;font-weight:600;cursor:pointer;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;margin-bottom:2px}
+.cal-modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center}
+.cal-modal{background:white;border-radius:12px;padding:24px;width:460px;max-width:95vw;box-shadow:0 8px 32px rgba(0,0,0,0.2)}
+</style>
+</head>
 <body>
 <div class="print-header-gialmar" id="printHeaderGialmar">
 <div style="display:flex;align-items:center;gap:16px">
@@ -222,11 +251,17 @@ body{font-family:"Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(
 <a class="nav-item" data-page="em_estudo" onclick="navigateTo('em_estudo')"><i class="fa-solid fa-magnifying-glass" style="color:#29b6f6"></i><span>Em Estudo</span></a>
 <a class="nav-item" data-page="por_validar" onclick="navigateTo('por_validar')"><i class="fa-solid fa-clock" style="color:#ffa726"></i><span>Por Validar</span></a>
 <a class="nav-item" data-page="inativo" onclick="navigateTo('inativo')"><i class="fa-solid fa-circle-xmark" style="color:#ef5350"></i><span>Inativos</span></a>
+<a class="nav-item nav-item-new" data-page="novo" onclick="navigateTo('novo')"><i class="fa-solid fa-plus-circle"></i><span>Novo Contacto</span></a>
 <div class="nav-section">Precos</div>
-<a class="nav-item" data-page="tabela" onclick="navigateTo('tabela')">
-<i class="fa-solid fa-fish"></i><span>Tabela de Precos</span>
-</a>
-<div class="nav-section">Ferramentas</div><a class="nav-item" data-page="visit_poland" onclick="navigateTo('visit_poland')"><i class="fa-solid fa-map-location-dot" style="color:#e53935"></i><span>Visit Poland</span></a><a class="nav-item" data-page="encomendas" onclick="navigateTo('encomendas')"><i class="fa-solid fa-box" style="color:#29b6f6"></i><span>Encomendas</span></a><a class="nav-item nav-item-new" data-page="novo" onclick="navigateTo('novo')"><i class="fa-solid fa-plus-circle"></i><span>Novo Contacto</span></a>
+<a class="nav-item" data-page="tabela" onclick="navigateTo('tabela')"><i class="fa-solid fa-fish"></i><span>Tabela de Precos</span></a>
+<div class="nav-section">Planeamentos</div>
+<a class="nav-item" data-page="visit_poland" onclick="navigateTo('visit_poland')"><i class="fa-solid fa-map-location-dot" style="color:#e53935"></i><span>Visit Poland</span></a>
+<div class="nav-section">Encomendas</div>
+<a class="nav-item" data-page="enc_nova" onclick="navigateTo('enc_nova')"><i class="fa-solid fa-plus-circle" style="color:#29b6f6"></i><span>Nova Encomenda</span></a>
+<a class="nav-item" data-page="enc_lista" onclick="navigateTo('enc_lista')"><i class="fa-solid fa-cart-shopping" style="color:#29b6f6"></i><span>As Minhas Encomendas</span></a>
+<a class="nav-item" data-page="enc_cliente" onclick="navigateTo('enc_cliente')"><i class="fa-solid fa-user-plus" style="color:#29b6f6"></i><span>Novo Cliente</span></a>
+<div class="nav-section">Calendario</div>
+<a class="nav-item" data-page="calendario" onclick="navigateTo('calendario')"><i class="fa-solid fa-calendar-days" style="color:#ab47bc"></i><span>Calendario</span></a>
 </nav>
 <div class="sidebar-footer">
 <div class="user-info">
@@ -488,6 +523,40 @@ function initNav() {
 }
 
 function navigateTo(page) {
+  var _cp=['visit_poland','enc_nova','enc_lista','enc_cliente','calendario'];
+  var _ct={'visit_poland':'Visit Poland','enc_nova':'Nova Encomenda','enc_lista':'As Minhas Encomendas','enc_cliente':'Novo Cliente','calendario':'Calendario'};
+  var _op={'enc_nova':'page-nova-encomenda','enc_lista':'page-encomendas','enc_cliente':'page-novo-cliente'};
+  document.querySelectorAll('.crm-overlay').forEach(function(o){o.classList.remove('active');});
+  if(_cp.indexOf(page)>=0){
+    document.querySelectorAll('.nav-item').forEach(function(i){i.classList.remove('active');});
+    var _n=document.querySelector('.nav-item[data-page="'+page+'"]');
+    if(_n)_n.classList.add('active');
+    var _t=document.getElementById('pageTitle');
+    if(_t)_t.textContent=_ct[page]||page;
+    if(page==='visit_poland'){
+      document.getElementById('crm-overlay-visit_poland').classList.add('active');
+      setTimeout(function(){if(!vpMapInited)vpTab('map');else if(vpMap)vpMap.invalidateSize();},200);
+    } else if(page==='calendario'){
+      var _calOv = document.getElementById('crm-overlay-calendario');
+      _calOv.classList.add('active');
+      setTimeout(function(){
+        calRender();
+        // Force re-render after layout is stable
+        setTimeout(function(){ calRender(); }, 300);
+      }, 50);
+    } else if(_op[page]){
+      document.getElementById('crm-overlay-enc_nova').classList.add('active');
+      document.querySelectorAll('.of-container .page').forEach(function(p){p.classList.remove('active');});
+      var _ofp=document.getElementById(_op[page]);
+      if(_ofp)_ofp.classList.add('active');
+      var _hi=document.getElementById('enc-header-icon');
+      var _ht=document.getElementById('enc-header-title');
+      var _icons={'enc_nova':'fa-plus-circle','enc_lista':'fa-cart-shopping','enc_cliente':'fa-user-plus'};
+      if(_hi)_hi.className='fas '+(_icons[page]||'fa-box');
+      if(_ht)_ht.textContent=_ct[page];
+    }
+    return;
+  }
   document.querySelectorAll('.nav-item').forEach(function(i){ i.classList.remove('active'); });
   document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('active'); });
   var nav = document.querySelector('.nav-item[data-page="' + page + '"]');
@@ -1236,516 +1305,1051 @@ function printWithHeader() {
 </div>
 <!-- TRIP PANEL -->
 <div id="vp-panel-trip" style="flex:1;display:none;overflow-y:auto;padding:20px;background:#f0f4f8">
-<div style="max-width:900px;margin:0 auto">
-<div style="background:linear-gradient(135deg,#0a2744,#1565c0);color:white;border-radius:12px;padding:20px 24px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between">
-<div>
-<div style="font-size:22px;font-weight:800">✈️ Viagem à Polónia – Setembro 2026</div>
-<div style="font-size:13px;opacity:0.8;margin-top:4px">09 Set – 16 Set 2026 · Porto ⇄ Wrocław</div>
-</div>
-<div style="display:flex;gap:16px;text-align:center">
-<div><div style="font-size:22px;font-weight:800">8</div><div style="font-size:11px;opacity:0.7">Dias</div></div>
-<div><div style="font-size:22px;font-weight:800">3</div><div style="font-size:11px;opacity:0.7">Reuniões</div></div>
-<div><div style="font-size:22px;font-weight:800">3</div><div style="font-size:11px;opacity:0.7">POLFISH</div></div>
-</div>
-</div>
-<!-- TIMELINE -->
-<div style="display:flex;flex-direction:column;gap:10px">
-<div style="background:#e3f2fd;border:1.5px solid #1565c0;border-radius:10px;padding:14px 18px;display:flex;align-items:flex-start;gap:14px">
-<div style="background:#1565c0;color:white;border-radius:8px;padding:8px 12px;text-align:center;flex-shrink:0;min-width:60px">
-<div style="font-size:16px;font-weight:800">09/09</div>
-<div style="font-size:11px;opacity:0.85">Ter</div>
-</div>
-<div style="flex:1">
-<div style="font-size:14px;font-weight:700;color:#0d2137;margin-bottom:4px">✈️ Porto → Wrocław (chegada 20:35)</div>
-<div style="font-size:12px;color:#555;display:flex;align-items:center;gap:6px">
-<i class="fas fa-bed" style="color:#1565c0"></i> Wrocław
-            </div>
-</div>
-<span style="background:#1565c0;color:white;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;flex-shrink:0">✈️ Viagem</span>
-</div>
-<div style="background:#f3e5f5;border:1.5px solid #7b1fa2;border-radius:10px;padding:14px 18px;display:flex;align-items:flex-start;gap:14px">
-<div style="background:#7b1fa2;color:white;border-radius:8px;padding:8px 12px;text-align:center;flex-shrink:0;min-width:60px">
-<div style="font-size:16px;font-weight:800">10/09</div>
-<div style="font-size:11px;opacity:0.85">Qua</div>
-</div>
-<div style="flex:1">
-<div style="font-size:14px;font-weight:700;color:#0d2137;margin-bottom:4px">🚗 Wrocław → Gdańsk + POLFISH</div>
-<div style="font-size:12px;color:#555;display:flex;align-items:center;gap:6px">
-<i class="fas fa-bed" style="color:#7b1fa2"></i> Hotel Arena Expo, Gdańsk
-            </div>
-<div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:6px"><span style="background:#7b1fa2;color:white;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600">Polfish Day 1</span></div>
-</div>
-<span style="background:#7b1fa2;color:white;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;flex-shrink:0">🎪 Feira</span>
-</div>
-<div style="background:#f3e5f5;border:1.5px solid #7b1fa2;border-radius:10px;padding:14px 18px;display:flex;align-items:flex-start;gap:14px">
-<div style="background:#7b1fa2;color:white;border-radius:8px;padding:8px 12px;text-align:center;flex-shrink:0;min-width:60px">
-<div style="font-size:16px;font-weight:800">11/09</div>
-<div style="font-size:11px;opacity:0.85">Qui</div>
-</div>
-<div style="flex:1">
-<div style="font-size:14px;font-weight:700;color:#0d2137;margin-bottom:4px">🇵🇱 POLFISH – Dia 2</div>
-<div style="font-size:12px;color:#555;display:flex;align-items:center;gap:6px">
-<i class="fas fa-bed" style="color:#7b1fa2"></i> Hotel Arena Expo, Gdańsk
-            </div>
-<div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:6px"><span style="background:#7b1fa2;color:white;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600">Polfish Day 2</span></div>
-</div>
-<span style="background:#7b1fa2;color:white;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;flex-shrink:0">🎪 Feira</span>
-</div>
-<div style="background:#f3e5f5;border:1.5px solid #7b1fa2;border-radius:10px;padding:14px 18px;display:flex;align-items:flex-start;gap:14px">
-<div style="background:#7b1fa2;color:white;border-radius:8px;padding:8px 12px;text-align:center;flex-shrink:0;min-width:60px">
-<div style="font-size:16px;font-weight:800">12/09</div>
-<div style="font-size:11px;opacity:0.85">Sex</div>
-</div>
-<div style="flex:1">
-<div style="font-size:14px;font-weight:700;color:#0d2137;margin-bottom:4px">🇵🇱 POLFISH – Dia 3 → 🚗 Gdańsk → Wrocław</div>
-<div style="font-size:12px;color:#555;display:flex;align-items:center;gap:6px">
-<i class="fas fa-bed" style="color:#7b1fa2"></i> Hotel Traffic, Wrocław
-            </div>
-<div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:6px"><span style="background:#7b1fa2;color:white;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600">Polfish Day 3</span></div>
-</div>
-<span style="background:#7b1fa2;color:white;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;flex-shrink:0">🎪 Feira</span>
-</div>
-<div style="background:#e8f5e9;border:1.5px solid #2e7d32;border-radius:10px;padding:14px 18px;display:flex;align-items:flex-start;gap:14px">
-<div style="background:#2e7d32;color:white;border-radius:8px;padding:8px 12px;text-align:center;flex-shrink:0;min-width:60px">
-<div style="font-size:16px;font-weight:800">13/09</div>
-<div style="font-size:11px;opacity:0.85">Sáb</div>
-</div>
-<div style="flex:1">
-<div style="font-size:14px;font-weight:700;color:#0d2137;margin-bottom:4px">🤝 Lisner – Poznań</div>
-<div style="font-size:12px;color:#555;display:flex;align-items:center;gap:6px">
-<i class="fas fa-bed" style="color:#2e7d32"></i> Wrocław
-            </div>
-<div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:6px"><span style="background:#2e7d32;color:white;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600">Lisner (Poznań)</span></div>
-</div>
-<span style="background:#2e7d32;color:white;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;flex-shrink:0">🤝 Reunião</span>
-</div>
-<div style="background:#e8f5e9;border:1.5px solid #2e7d32;border-radius:10px;padding:14px 18px;display:flex;align-items:flex-start;gap:14px">
-<div style="background:#2e7d32;color:white;border-radius:8px;padding:8px 12px;text-align:center;flex-shrink:0;min-width:60px">
-<div style="font-size:16px;font-weight:800">14/09</div>
-<div style="font-size:11px;opacity:0.85">Dom</div>
-</div>
-<div style="flex:1">
-<div style="font-size:14px;font-weight:700;color:#0d2137;margin-bottom:4px">🤝 Admiral – Lędziny</div>
-<div style="font-size:12px;color:#555;display:flex;align-items:center;gap:6px">
-<i class="fas fa-bed" style="color:#2e7d32"></i> Wrocław
-            </div>
-<div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:6px"><span style="background:#2e7d32;color:white;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600">Admiral (Lędziny)</span></div>
-</div>
-<span style="background:#2e7d32;color:white;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;flex-shrink:0">🤝 Reunião</span>
-</div>
-<div style="background:#e8f5e9;border:1.5px solid #2e7d32;border-radius:10px;padding:14px 18px;display:flex;align-items:flex-start;gap:14px">
-<div style="background:#2e7d32;color:white;border-radius:8px;padding:8px 12px;text-align:center;flex-shrink:0;min-width:60px">
-<div style="font-size:16px;font-weight:800">15/09</div>
-<div style="font-size:11px;opacity:0.85">Seg</div>
-</div>
-<div style="flex:1">
-<div style="font-size:14px;font-weight:700;color:#0d2137;margin-bottom:4px">⭐ Polska Grupa Rybna – Nowy Sącz</div>
-<div style="font-size:12px;color:#555;display:flex;align-items:center;gap:6px">
-<i class="fas fa-bed" style="color:#2e7d32"></i> Wrocław
-            </div>
-<div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:6px"><span style="background:#2e7d32;color:white;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600">Polska Grupa Rybna (Nowy Sącz)</span></div>
-</div>
-<span style="background:#2e7d32;color:white;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;flex-shrink:0">🤝 Reunião</span>
-</div>
-<div style="background:#e3f2fd;border:1.5px solid #1565c0;border-radius:10px;padding:14px 18px;display:flex;align-items:flex-start;gap:14px">
-<div style="background:#1565c0;color:white;border-radius:8px;padding:8px 12px;text-align:center;flex-shrink:0;min-width:60px">
-<div style="font-size:16px;font-weight:800">16/09</div>
-<div style="font-size:11px;opacity:0.85">Ter</div>
-</div>
-<div style="flex:1">
-<div style="font-size:14px;font-weight:700;color:#0d2137;margin-bottom:4px">Manhã livre → ✈️ Wrocław → Porto (17:35)</div>
-<div style="font-size:12px;color:#555;display:flex;align-items:center;gap:6px">
-<i class="fas fa-bed" style="color:#1565c0"></i> —
-            </div>
-</div>
-<span style="background:#1565c0;color:white;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;flex-shrink:0">✈️ Viagem</span>
-</div>
-</div>
-<!-- SUMMARY -->
-<div style="margin-top:20px;background:white;border-radius:12px;padding:18px 20px;box-shadow:0 2px 8px rgba(0,0,0,0.08)">
-<div style="font-size:15px;font-weight:700;color:#0d2137;margin-bottom:12px">🏆 Resumo da Viagem</div>
-<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px">
-<div style="background:#e3f2fd;border-radius:8px;padding:12px;text-align:center">
-<div style="font-size:22px;font-weight:800;color:#1565c0">09–16 Set</div>
-<div style="font-size:12px;color:#666">Datas</div>
-</div>
-<div style="background:#f3e5f5;border-radius:8px;padding:12px;text-align:center">
-<div style="font-size:22px;font-weight:800;color:#7b1fa2">POLFISH</div>
-<div style="font-size:12px;color:#666">10–12 Set · Gdańsk</div>
-</div>
-<div style="background:#e8f5e9;border-radius:8px;padding:12px;text-align:center">
-<div style="font-size:22px;font-weight:800;color:#2e7d32">3</div>
-<div style="font-size:12px;color:#666">Reuniões agendadas</div>
-</div>
-<div style="background:#fff8e1;border-radius:8px;padding:12px;text-align:center">
-<div style="font-size:22px;font-weight:800;color:#f57f17">Wrocław</div>
-<div style="font-size:12px;color:#666">Base principal</div>
-</div>
-</div>
-</div>
-</div>
-</div>
+    <div style="max-width:800px;margin:0 auto">
+      <div style="background:linear-gradient(135deg,#0a2744,#1565c0);color:white;border-radius:12px;padding:18px 22px;margin-bottom:16px">
+        <div style="font-size:18px;font-weight:800">✈️ Viagem à Polónia – Setembro 2026</div>
+        <div style="font-size:12px;opacity:0.8;margin-top:4px">09 Set – 16 Set 2026 | Porto ⇄ Wrocław</div>
+        <div style="display:flex;gap:16px;margin-top:12px">
+          <div style="background:rgba(255,255,255,0.15);border-radius:8px;padding:8px 14px;text-align:center">
+            <div style="font-size:20px;font-weight:800">8</div><div style="font-size:10px;opacity:0.8">Dias</div>
+          </div>
+          <div style="background:rgba(255,255,255,0.15);border-radius:8px;padding:8px 14px;text-align:center">
+            <div style="font-size:20px;font-weight:800">3</div><div style="font-size:10px;opacity:0.8">Dias POLFISH</div>
+          </div>
+          <div style="background:rgba(255,255,255,0.15);border-radius:8px;padding:8px 14px;text-align:center">
+            <div style="font-size:20px;font-weight:800">2</div><div style="font-size:10px;opacity:0.8">Reuniões</div>
+          </div>
+          <div style="background:rgba(255,255,255,0.15);border-radius:8px;padding:8px 14px;text-align:center">
+            <div style="font-size:20px;font-weight:800">Wrocław</div><div style="font-size:10px;opacity:0.8">Base</div>
+          </div>
+        </div>
+      </div>
+      <div style="background:#e3f2fd;border:1.5px solid #1565c0;border-radius:10px;padding:12px 16px;display:flex;align-items:flex-start;gap:12px;margin-bottom:8px">
+      <div style="background:#1565c0;color:white;border-radius:8px;padding:6px 10px;text-align:center;flex-shrink:0;min-width:55px">
+        <div style="font-size:15px;font-weight:800">09/09</div>
+        <div style="font-size:10px;opacity:0.85">Ter</div>
+      </div>
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:700;color:#0d2137;margin-bottom:3px">Porto → Wrocław (chegada 20:35)</div>
+        <div style="font-size:11px;color:#555;margin-bottom:4px">Wrocław</div>
+        <span style="background:#1565c0;color:white;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;margin-right:4px">Voo TAP</span>
+      </div>
+      <span style="background:#1565c0;color:white;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;flex-shrink:0">Viagem</span>
+    </div><div style="background:#f3e5f5;border:1.5px solid #7b1fa2;border-radius:10px;padding:12px 16px;display:flex;align-items:flex-start;gap:12px;margin-bottom:8px">
+      <div style="background:#7b1fa2;color:white;border-radius:8px;padding:6px 10px;text-align:center;flex-shrink:0;min-width:55px">
+        <div style="font-size:15px;font-weight:800">10/09</div>
+        <div style="font-size:10px;opacity:0.85">Qua</div>
+      </div>
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:700;color:#0d2137;margin-bottom:3px">Wrocław → Gdańsk + POLFISH Dia 1</div>
+        <div style="font-size:11px;color:#555;margin-bottom:4px">Hotel Arena Expo, Gdańsk</div>
+        <span style="background:#7b1fa2;color:white;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;margin-right:4px">POLFISH Dia 1</span>
+      </div>
+      <span style="background:#7b1fa2;color:white;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;flex-shrink:0">Feira</span>
+    </div><div style="background:#f3e5f5;border:1.5px solid #7b1fa2;border-radius:10px;padding:12px 16px;display:flex;align-items:flex-start;gap:12px;margin-bottom:8px">
+      <div style="background:#7b1fa2;color:white;border-radius:8px;padding:6px 10px;text-align:center;flex-shrink:0;min-width:55px">
+        <div style="font-size:15px;font-weight:800">11/09</div>
+        <div style="font-size:10px;opacity:0.85">Qui</div>
+      </div>
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:700;color:#0d2137;margin-bottom:3px">POLFISH – Dia 2</div>
+        <div style="font-size:11px;color:#555;margin-bottom:4px">Hotel Arena Expo, Gdańsk</div>
+        <span style="background:#7b1fa2;color:white;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;margin-right:4px">POLFISH Dia 2</span>
+      </div>
+      <span style="background:#7b1fa2;color:white;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;flex-shrink:0">Feira</span>
+    </div><div style="background:#f3e5f5;border:1.5px solid #7b1fa2;border-radius:10px;padding:12px 16px;display:flex;align-items:flex-start;gap:12px;margin-bottom:8px">
+      <div style="background:#7b1fa2;color:white;border-radius:8px;padding:6px 10px;text-align:center;flex-shrink:0;min-width:55px">
+        <div style="font-size:15px;font-weight:800">12/09</div>
+        <div style="font-size:10px;opacity:0.85">Sex</div>
+      </div>
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:700;color:#0d2137;margin-bottom:3px">POLFISH – Dia 3 → Gdańsk → Wrocław</div>
+        <div style="font-size:11px;color:#555;margin-bottom:4px">Hotel Traffic, Wrocław</div>
+        <span style="background:#7b1fa2;color:white;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;margin-right:4px">POLFISH Dia 3</span>
+      </div>
+      <span style="background:#7b1fa2;color:white;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;flex-shrink:0">Feira</span>
+    </div><div style="background:#eceff1;border:1.5px solid #78909c;border-radius:10px;padding:12px 16px;display:flex;align-items:flex-start;gap:12px;margin-bottom:8px">
+      <div style="background:#78909c;color:white;border-radius:8px;padding:6px 10px;text-align:center;flex-shrink:0;min-width:55px">
+        <div style="font-size:15px;font-weight:800">13/09</div>
+        <div style="font-size:10px;opacity:0.85">Sáb</div>
+      </div>
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:700;color:#0d2137;margin-bottom:3px">Dia Livre – Empresas fechadas (Domingo)</div>
+        <div style="font-size:11px;color:#555;margin-bottom:4px">Wrocław</div>
+        
+      </div>
+      <span style="background:#78909c;color:white;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;flex-shrink:0">Livre</span>
+    </div><div style="background:#e8f5e9;border:1.5px solid #2e7d32;border-radius:10px;padding:12px 16px;display:flex;align-items:flex-start;gap:12px;margin-bottom:8px">
+      <div style="background:#2e7d32;color:white;border-radius:8px;padding:6px 10px;text-align:center;flex-shrink:0;min-width:55px">
+        <div style="font-size:15px;font-weight:800">14/09</div>
+        <div style="font-size:10px;opacity:0.85">Dom</div>
+      </div>
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:700;color:#0d2137;margin-bottom:3px">Admiral – Lędziny</div>
+        <div style="font-size:11px;color:#555;margin-bottom:4px">Wrocław</div>
+        <span style="background:#2e7d32;color:white;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;margin-right:4px">Admiral (Lędziny)</span>
+      </div>
+      <span style="background:#2e7d32;color:white;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;flex-shrink:0">Reuniao</span>
+    </div><div style="background:#fff8e1;border:1.5px solid #e53935;border-radius:10px;padding:12px 16px;display:flex;align-items:flex-start;gap:12px;margin-bottom:8px">
+      <div style="background:#e53935;color:white;border-radius:8px;padding:6px 10px;text-align:center;flex-shrink:0;min-width:55px">
+        <div style="font-size:15px;font-weight:800">15/09</div>
+        <div style="font-size:10px;opacity:0.85">Seg</div>
+      </div>
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:700;color:#0d2137;margin-bottom:3px">Polska Grupa Rybna – Nowy Sącz</div>
+        <div style="font-size:11px;color:#555;margin-bottom:4px">Wrocław</div>
+        <span style="background:#e53935;color:white;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;margin-right:4px">Polska Grupa Rybna (Nowy Sącz)</span>
+      </div>
+      <span style="background:#e53935;color:white;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;flex-shrink:0">Reuniao A</span>
+    </div><div style="background:#e3f2fd;border:1.5px solid #1565c0;border-radius:10px;padding:12px 16px;display:flex;align-items:flex-start;gap:12px;margin-bottom:8px">
+      <div style="background:#1565c0;color:white;border-radius:8px;padding:6px 10px;text-align:center;flex-shrink:0;min-width:55px">
+        <div style="font-size:15px;font-weight:800">16/09</div>
+        <div style="font-size:10px;opacity:0.85">Ter</div>
+      </div>
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:700;color:#0d2137;margin-bottom:3px">Manhã livre → Wrocław → Porto (17:35)</div>
+        
+        <span style="background:#1565c0;color:white;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;margin-right:4px">Voo 17:35</span>
+      </div>
+      <span style="background:#1565c0;color:white;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;flex-shrink:0">Viagem</span>
+    </div>
+      <div style="background:#fff8e1;border:1.5px solid #f57f17;border-radius:10px;padding:12px 16px;margin-top:8px;font-size:12px;color:#e65100">
+        <strong>⚠️ Nota:</strong> Dia 13/09 (Sábado) – empresas fechadas. Dia livre em Wrocław.
+      </div>
+    </div>
+  </div>
 </div>
 
-<div class="page" id="page-encomendas" style="padding:0;height:calc(100vh - var(--topbar-h));display:none;flex-direction:column">
-<div style="background:linear-gradient(135deg,#1a3a42,#2e7d8c);color:white;padding:10px 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
-<div style="display:flex;align-items:center;gap:10px">
-<i class="fas fa-box" style="font-size:20px"></i>
-<div>
-<div style="font-size:16px;font-weight:700">Gestão de Encomendas</div>
-<div style="font-size:11px;opacity:0.7">Orderflow Gialmar – Gonçalo C.</div>
+<div id="crm-overlay-enc_nova" class="crm-overlay">
+  <div style="background:linear-gradient(135deg,#1a3a42,#2e7d8c);color:white;padding:8px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
+    <div style="display:flex;align-items:center;gap:10px">
+      <i id="enc-header-icon" class="fas fa-plus-circle" style="font-size:18px"></i>
+      <div><div style="font-size:15px;font-weight:700" id="enc-header-title">Nova Encomenda</div>
+      <div style="font-size:11px;opacity:0.7">Orderflow Gialmar</div></div>
+    </div>
+    
+  </div>
+  <div class="of-container">
+    <section class="page active" id="page-nova-encomenda">
+<div class="order-form-layout">
+<div class="order-form-main">
+<div class="card">
+<div class="card-header"><h2><i class="fa-solid fa-user"></i> Cliente</h2></div>
+<div class="card-body">
+<div class="form-row">
+<div class="form-group" style="flex:2">
+<label>Cliente *</label>
+<div class="client-search-wrap">
+<input autocomplete="off" class="input-text" id="clienteSearchInput" oninput="onClienteSearch(this.value)" placeholder="Pesquisar cliente..." type="text"/>
+<input id="orderClienteId" type="hidden"/>
+<div class="client-dropdown" id="clienteDropdown"></div>
 </div>
 </div>
-<a href="https://gialmar-apps.netlify.app/orderflow_goncalo.html" style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);color:white;padding:5px 12px;border-radius:20px;text-decoration:none;font-size:12px;font-weight:600" target="_blank">
-<i class="fas fa-external-link-alt"></i> Abrir em nova aba
-    </a>
+<div class="form-group">
+<label>Data</label>
+<input class="input-text" id="orderData" type="date"/>
 </div>
-<iframe id="orderflow-iframe" src="https://gialmar-apps.netlify.app/orderflow_goncalo.html" style="flex:1;border:none;width:100%" title="Encomendas Gialmar">
-</iframe>
+</div>
+<div class="form-group">
+<label>Notas</label>
+<textarea class="input-textarea" id="orderNotas" placeholder="Observacoes..."></textarea>
+</div>
+</div>
+</div>
+<div class="card">
+<div class="card-header">
+<h2><i class="fa-solid fa-list"></i> Produtos</h2>
+<button class="btn btn-secondary btn-sm" id="btnAddItem"><i class="fa-solid fa-plus"></i> Adicionar</button>
+</div>
+<div class="card-body" style="padding:0">
+<div class="order-items-header">
+<span>Produto</span><span>Qtd. / Unidade</span><span>Preco Tabela</span><span>Meu Preco</span><span></span>
+</div>
+<div id="orderItemsList"></div>
+<div class="order-empty" id="orderEmpty">
+<i class="fa-solid fa-cart-plus"></i><p>Adicione produtos a encomenda</p>
+</div>
+</div>
+</div>
+</div>
+<div class="order-form-sidebar">
+<div class="card">
+<div class="card-header"><h2><i class="fa-solid fa-receipt"></i> Resumo</h2></div>
+<div class="card-body">
+<div class="summary-line"><span>Total</span><span id="summaryTotal" style="font-weight:700;color:var(--primary)">0,00 EUR</span></div>
+<div style="font-size:12px;color:var(--text-muted);margin-top:4px"><i class="fa-solid fa-box"></i> <span id="summaryItems">0 itens</span></div>
+</div>
+<div class="card-footer">
+<button class="btn btn-outline w-full" id="btnClearOrder"><i class="fa-solid fa-trash"></i> Limpar</button>
+<button class="btn btn-primary w-full" id="btnSubmitOrder"><i class="fa-solid fa-paper-plane"></i> Submeter para Aprovacao</button>
+</div>
+</div>
+<div class="card">
+<div class="card-body">
+<p class="hint-text"><i class="fa-solid fa-bell"></i> Apos submissao, o gerente recebera uma notificacao para aprovar a encomenda.</p>
+<p class="hint-text" style="margin-top:8px"><i class="fa-solid fa-lock"></i> Estado <strong>Pendente</strong> ate decisao do gerente.</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+    <section class="page" id="page-encomendas">
+<div class="page-actions">
+<select class="input-text" id="filterEstado" style="width:180px;padding:7px 10px">
+<option value="">Todos os estados</option>
+<option value="pendente">Pendente</option>
+<option value="aprovada">Aprovada</option>
+<option value="rejeitada">Rejeitada</option>
+</select>
+<button class="btn btn-primary btn-sm" onclick="navigateTo('nova-encomenda')"><i class="fa-solid fa-plus"></i> Nova Encomenda</button>
+</div>
+<div class="table-wrapper">
+<table class="data-table">
+<thead><tr><th>Nr</th><th>Data</th><th>Cliente</th><th>Itens</th><th>Total</th><th>Estado</th><th>Acoes</th></tr></thead>
+<tbody id="bodyEncomendas"></tbody>
+</table>
+<div class="table-empty" id="emptyEncomendas" style="display:none">
+<i class="fa-solid fa-cart-shopping"></i><p>Sem encomendas ainda.</p>
+</div>
+</div>
+</section>
+    <section class="page" id="page-novo-cliente">
+<div style="max-width:560px">
+<div class="card">
+<div class="card-header"><h2><i class="fa-solid fa-user-plus"></i> Novo Cliente</h2></div>
+<div class="card-body">
+<div class="form-group"><label>Nome / Empresa *</label><input class="input-text" id="ncNome" placeholder="Nome completo ou empresa" type="text"/></div>
+<div class="form-row">
+<div class="form-group"><label>NIF</label><input class="input-text" id="ncNIF" placeholder="Ex: 123456789" type="text"/></div>
+<div class="form-group"><label>Telefone</label><input class="input-text" id="ncTel" placeholder="Ex: 912 345 678" type="text"/></div>
+</div>
+<div class="form-group"><label>Email</label><input class="input-text" id="ncEmail" placeholder="email@exemplo.pt" type="email"/></div>
+<div class="form-group"><label>Morada</label><input class="input-text" id="ncMorada" placeholder="Rua, nr, codigo postal, cidade" type="text"/></div>
+<div class="form-group"><label>Notas</label><textarea class="input-textarea" id="ncNotas" placeholder="Observacoes..."></textarea></div>
+</div>
+<div class="card-footer" style="flex-direction:row;justify-content:flex-end">
+<button class="btn btn-outline" onclick="limparCliente()"><i class="fa-solid fa-rotate-left"></i> Limpar</button>
+<button class="btn btn-primary" id="btnSaveCliente"><i class="fa-solid fa-floppy-disk"></i> Guardar Cliente</button>
+</div>
+</div>
+</div>
+</section>
+  </div>
 </div>
 
-<style>
-@keyframes vpPulse { 0%,100% { opacity:1 } 50% { opacity:0.6 } }
-.vp-card { border:1.5px solid #e0e0e0;border-radius:8px;padding:9px 11px;cursor:pointer;transition:all 0.2s;background:white;position:relative; }
-.vp-card:hover { border-color:#1565c0;box-shadow:0 2px 8px rgba(21,101,192,0.15);transform:translateX(2px); }
-.vp-card.in-route { border-color:#43a047;background:#e8f5e9; }
-.vp-route-num { position:absolute;top:7px;right:7px;background:#1565c0;color:white;border-radius:50%;width:18px;height:18px;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center; }
-.vp-filter.active { background:#1565c0!important;color:white!important;border-color:#1565c0!important; }
-</style>
+<div id="crm-overlay-calendario" class="crm-overlay" style="background:#f3f4f6">
+  <div style="background:white;border-bottom:1px solid #e0e0e0;padding:10px 20px;display:flex;align-items:center;gap:12px;flex-shrink:0">
+    <button onclick="calToday()" style="padding:6px 14px;background:#0078d4;color:white;border:none;border-radius:4px;cursor:pointer;font-size:13px;font-weight:600">Hoje</button>
+    <div style="display:flex;gap:4px">
+      <button onclick="calNav(-1)" style="width:28px;height:28px;border:1px solid #e0e0e0;background:white;border-radius:4px;cursor:pointer;font-size:14px">&lt;</button>
+      <button onclick="calNav(1)" style="width:28px;height:28px;border:1px solid #e0e0e0;background:white;border-radius:4px;cursor:pointer;font-size:14px">&gt;</button>
+    </div>
+    <div style="font-size:18px;font-weight:700;color:#1a1a1a;min-width:200px" id="cal-title"></div>
+    <div style="margin-left:auto;display:flex;gap:4px">
+      <button onclick="calSetView('month')" id="cal-btn-month" style="padding:5px 12px;border:1px solid #0078d4;background:#0078d4;color:white;border-radius:4px;cursor:pointer;font-size:12px;font-weight:600">Mes</button>
+      <button onclick="calSetView('week')" id="cal-btn-week" style="padding:5px 12px;border:1px solid #e0e0e0;background:white;color:#333;border-radius:4px;cursor:pointer;font-size:12px;font-weight:600">Semana</button>
+      <button onclick="calSetView('day')" id="cal-btn-day" style="padding:5px 12px;border:1px solid #e0e0e0;background:white;color:#333;border-radius:4px;cursor:pointer;font-size:12px;font-weight:600">Dia</button>
+      <button onclick="calOpenNew(null)" style="padding:5px 14px;border:none;background:#0078d4;color:white;border-radius:4px;cursor:pointer;font-size:12px;font-weight:600;margin-left:8px">+ Novo Evento</button>
+    </div>
+  </div>
+  <div style="display:flex;flex:1;overflow:hidden;min-height:0">
+    <div style="width:220px;background:white;border-right:1px solid #e0e0e0;padding:12px;overflow-y:auto;flex-shrink:0">
+      <div id="cal-mini"></div>
+      <div style="margin-top:16px"><div style="font-size:11px;font-weight:700;color:#666;text-transform:uppercase;margin-bottom:8px">Proximos Eventos</div>
+      <div id="cal-upcoming"></div></div>
+    </div>
+    <div style="flex:1;overflow:auto;min-width:0" id="cal-main"></div>
+  </div>
+  <div id="cal-modal" style="display:none" class="cal-modal-overlay" onclick="if(event.target===this)calCloseModal()">
+    <div class="cal-modal">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+        <div style="font-size:16px;font-weight:700" id="cal-modal-title">Novo Evento</div>
+        <button onclick="calCloseModal()" style="background:none;border:none;font-size:18px;cursor:pointer;color:#666">X</button>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div><label style="font-size:12px;font-weight:600;color:#555;display:block;margin-bottom:4px">Titulo</label>
+          <input id="cal-ev-title" type="text" placeholder="Titulo do evento" style="width:100%;padding:8px 12px;border:1.5px solid #e0e0e0;border-radius:6px;font-size:13px;outline:none"/></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div><label style="font-size:12px;font-weight:600;color:#555;display:block;margin-bottom:4px">Data inicio</label>
+            <input id="cal-ev-start" type="datetime-local" style="width:100%;padding:8px 10px;border:1.5px solid #e0e0e0;border-radius:6px;font-size:12px;outline:none"/></div>
+          <div><label style="font-size:12px;font-weight:600;color:#555;display:block;margin-bottom:4px">Data fim</label>
+            <input id="cal-ev-end" type="datetime-local" style="width:100%;padding:8px 10px;border:1.5px solid #e0e0e0;border-radius:6px;font-size:12px;outline:none"/></div>
+        </div>
+        <div><label style="font-size:12px;font-weight:600;color:#555;display:block;margin-bottom:4px">Cor</label>
+          <div style="display:flex;gap:8px" id="cal-color-picker">
+            <div onclick="calSelectColor('#0078d4',this)" style="width:24px;height:24px;border-radius:50%;background:#0078d4;cursor:pointer;border:3px solid #0078d4;box-shadow:0 0 0 2px white inset"></div>
+            <div onclick="calSelectColor('#e53935',this)" style="width:24px;height:24px;border-radius:50%;background:#e53935;cursor:pointer"></div>
+            <div onclick="calSelectColor('#43a047',this)" style="width:24px;height:24px;border-radius:50%;background:#43a047;cursor:pointer"></div>
+            <div onclick="calSelectColor('#fb8c00',this)" style="width:24px;height:24px;border-radius:50%;background:#fb8c00;cursor:pointer"></div>
+            <div onclick="calSelectColor('#7b1fa2',this)" style="width:24px;height:24px;border-radius:50%;background:#7b1fa2;cursor:pointer"></div>
+          </div></div>
+        <div><label style="font-size:12px;font-weight:600;color:#555;display:block;margin-bottom:4px">Lembrete</label>
+          <select id="cal-ev-reminder" style="width:100%;padding:8px 12px;border:1.5px solid #e0e0e0;border-radius:6px;font-size:13px;outline:none">
+            <option value="">Sem lembrete</option><option value="5">5 minutos antes</option>
+            <option value="15">15 minutos antes</option><option value="30">30 minutos antes</option>
+            <option value="60">1 hora antes</option><option value="1440">1 dia antes</option>
+          </select></div>
+        <div><label style="font-size:12px;font-weight:600;color:#555;display:block;margin-bottom:4px">Notas</label>
+          <textarea id="cal-ev-notes" placeholder="Adicionar notas..." rows="3" style="width:100%;padding:8px 12px;border:1.5px solid #e0e0e0;border-radius:6px;font-size:13px;outline:none;resize:vertical"></textarea></div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:18px;justify-content:flex-end">
+        <button id="cal-btn-delete" onclick="calDeleteEvent()" style="display:none;padding:8px 16px;background:white;color:#e53935;border:1.5px solid #e53935;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600">Eliminar</button>
+        <button onclick="calCloseModal()" style="padding:8px 16px;background:white;color:#333;border:1.5px solid #e0e0e0;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600">Cancelar</button>
+        <button onclick="calSaveEvent()" style="padding:8px 20px;background:#0078d4;color:white;border:none;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600">Guardar</button>
+      </div>
+    </div>
+  </div>
+</div>
 <script>
-// ===== VISIT POLAND MODULE =====
-var vpMap = null, vpMarkers = {}, vpRouteStops = [], vpRoutingControl = null;
-var vpContacts = [], vpFilter = 'all', vpMapInited = false;
 
-var VP_APPS_URL = "https://script.google.com/macros/s/AKfycbyWCvCt36e-oLl-elonsegSa2lNxW_T8giCKmMzt1vbcVoytRy_IWlMpupRbnipx5gG/exec";
-var VP_CITY_COORDS = {"szczecin": [53.4285, 14.5528], "70-644 szczecin": [53.4285, 14.5528], "70-651 szczecin": [53.4285, 14.5528], "70-205 szczecin": [53.4285, 14.5528], "70-462 szczecin": [53.4285, 14.5528], "70-846 szczecin": [53.4285, 14.5528], "gdańsk": [54.352, 18.6466], "gdansk": [54.352, 18.6466], "gdynia": [54.5189, 18.5305], "warszawa": [52.2297, 21.0122], "warsaw": [52.2297, 21.0122], "00-693 warszawa": [52.2297, 21.0122], "00-120 warszawa": [52.2297, 21.0122], "bydgoszcz": [53.1235, 18.0084], "kościan": [52.0833, 16.65], "64-000 kościan": [52.0833, 16.65], "czosnów / warszawa": [52.3667, 20.7833], "poznań": [52.4064, 16.9252], "kołobrzeg": [54.1776, 15.5716], "78-100 kołobrzeg": [54.1776, 15.5716], "słupsk": [54.4641, 17.0285], "76-202 słupsk 2": [54.4641, 17.0285], "slupsk": [54.4641, 17.0285], "nowy sącz": [49.6237, 20.6948], "33-300 nowy sącz": [49.6237, 20.6948], "05-850 ożarów mazowiecki": [52.2, 20.8], "42-202 częstochowa": [50.8118, 19.1203], "41-503 chorzów": [50.2965, 18.9543], "76-004 sianów": [54.2333, 16.2833], "62-200 gniezno": [52.5347, 17.5826], "05-807 podkowa leśna": [52.1167, 20.7167], "87-100  toruń": [53.0138, 18.5984], "11-700 mrągowo": [53.8667, 21.3], "81-198 mosty": [54.55, 18.45], "42-350 koziegłowy": [50.6167, 19.1333], "84-250 gniewino": [54.6833, 18.2167], "75 - 511 koszalin": [54.1943, 16.1722], "goleniów": [53.5667, 14.8333], "stargard": [53.3333, 15.05], "jarocin": [51.9667, 17.5], "63-200 jarocin": [51.9667, 17.5], "gniewino": [54.6833, 18.2167], "łebcz": [54.7167, 18.3], "rytel": [53.75, 17.75], "bochnia": [49.9667, 20.4333], "32-700 bochnia": [49.9667, 20.4333], "władysławowo": [54.7833, 18.4167], "puck": [54.7167, 18.4], "wejherowo": [54.6, 18.2333], "84-200 wejherowo": [54.6, 18.2333], "maszewo": [53.4833, 14.9167], "sopot": [54.4418, 18.5601], "trzebiatów": [54.0667, 15.2667], "jaraczewo": [51.9, 17.5333], "chojnice": [53.6964, 17.5567], "89-620 chojnice": [53.6964, 17.5567], "lędziny": [50.1333, 19.0], "brusy": [53.8833, 17.7167], "wrocław": [51.1079, 17.0385], "wroclaw": [51.1079, 17.0385]};
-var VP_PRIORITY_COLORS = { "A":"#e53935","B":"#fb8c00","C":"#43a047" };
-var VP_TRIP = [{"date": "09/09", "day": "Ter", "plan": "✈️ Porto → Wrocław (chegada 20:35)", "hotel": "Wrocław", "meetings": [], "type": "travel"}, {"date": "10/09", "day": "Qua", "plan": "🚗 Wrocław → Gdańsk + POLFISH", "hotel": "Hotel Arena Expo, Gdańsk", "meetings": ["Polfish Day 1"], "type": "fair"}, {"date": "11/09", "day": "Qui", "plan": "🇵🇱 POLFISH – Dia 2", "hotel": "Hotel Arena Expo, Gdańsk", "meetings": ["Polfish Day 2"], "type": "fair"}, {"date": "12/09", "day": "Sex", "plan": "🇵🇱 POLFISH – Dia 3 → 🚗 Gdańsk → Wrocław", "hotel": "Hotel Traffic, Wrocław", "meetings": ["Polfish Day 3"], "type": "fair"}, {"date": "13/09", "day": "Sáb", "plan": "🤝 Lisner – Poznań", "hotel": "Wrocław", "meetings": ["Lisner (Poznań)"], "type": "meeting", "city": "Poznań", "lat": 52.4064, "lon": 16.9252}, {"date": "14/09", "day": "Dom", "plan": "🤝 Admiral – Lędziny", "hotel": "Wrocław", "meetings": ["Admiral (Lędziny)"], "type": "meeting", "city": "Lędziny", "lat": 50.1333, "lon": 19.0}, {"date": "15/09", "day": "Seg", "plan": "⭐ Polska Grupa Rybna – Nowy Sącz", "hotel": "Wrocław", "meetings": ["Polska Grupa Rybna (Nowy Sącz)"], "type": "meeting", "city": "Nowy Sącz", "lat": 49.6237, "lon": 20.6948}, {"date": "16/09", "day": "Ter", "plan": "Manhã livre → ✈️ Wrocław → Porto (17:35)", "hotel": "—", "meetings": [], "type": "travel"}];
+const LOGO_B64="";
+const APPS_SCRIPT_URL="https://script.google.com/macros/s/AKfycbyWCvCt36e-oLl-elonsegSa2lNxW_T8giCKmMzt1vbcVoytRy_IWlMpupRbnipx5gG/exec";
+const UTILIZADOR={nome:"Goncalo C.",role:"Comercial",isGerente:false};
+// ===== DADOS GIALMAR - Agosto 2026 =====
+const PRODUTOS_INICIAIS = [];
 
-// Trip route cities with coords
-var VP_TRIP_ROUTE = [
-  {name:"Porto", lat:41.1579, lon:-8.6291, type:"airport"},
-  {name:"Wrocław", lat:51.1079, lon:17.0385, type:"base"},
-  {name:"Gdańsk (POLFISH)", lat:54.3520, lon:18.6466, type:"fair"},
-  {name:"Wrocław", lat:51.1079, lon:17.0385, type:"base"},
-  {name:"Poznań (Lisner)", lat:52.4064, lon:16.9252, type:"meeting"},
-  {name:"Lędziny (Admiral)", lat:50.1333, lon:19.0000, type:"meeting"},
-  {name:"Nowy Sącz (Polska Grupa Rybna)", lat:49.6237, lon:20.6948, type:"meeting"},
-  {name:"Wrocław", lat:51.1079, lon:17.0385, type:"base"},
-];
+const CLIENTES_INICIAIS = [];
 
-function vpGetCoords(city) {
-  if (!city) return null;
-  var c = city.trim().toLowerCase();
-  if (VP_CITY_COORDS[c]) return VP_CITY_COORDS[c];
-  for (var k in VP_CITY_COORDS) {
-    if (c.includes(k) || k.includes(c)) return VP_CITY_COORDS[k];
+// ===== GIALMAR ORDERFLOW — COM GOOGLE SHEETS =====
+// CONFIGURAÇÃO — substitui pelo URL do teu Apps Script Web App
+// APPS_SCRIPT_URL definido externamente
+
+// ===== CONFIG DO UTILIZADOR (definido em cada ficheiro) =====
+
+// ===== STATE LOCAL =====
+let DB = {
+  produtos: [],   // carregados do data.js (tabela de preços local)
+  clientes: [],   // sincronizados com Google Sheets
+  encomendas: [], // sincronizados com Google Sheets
+  notificacoes: []
+};
+let currentOrderItems = [];
+let editingClienteId = null;
+let editingProdutoId = null;
+let produtosPage = 1, clientesPage = 1;
+const PAGE_SIZE_PROD = 30, PAGE_SIZE_CLI = 50;
+let syncInterval = null;
+let lastSync = null;
+
+// ===== INIT =====
+document.addEventListener('DOMContentLoaded', function() {
+  loadProdutosLocais();
+  loadLogo();
+  initNav();
+  initNovaEncomenda();
+  initEncomendas();
+  initNovoCliente();
+  initNotifications();
+  if (typeof initGerente === 'function') initGerente();
+  setTodayDate();
+  syncAll();
+  // Auto-sync a cada 30 segundos
+  syncInterval = setInterval(syncAll, 30000);
+});
+
+// ===== LOGO =====
+function loadLogo() {
+  if (typeof LOGO_B64 !== 'undefined') {
+    var el = document.getElementById('sidebarLogo');
+    if (el) el.src = 'data:image/jpeg;base64,' + LOGO_B64;
   }
-  var m = c.match(/^[\d\-]+\s+(.+)/);
-  if (m && VP_CITY_COORDS[m[1].trim()]) return VP_CITY_COORDS[m[1].trim()];
-  return null;
 }
 
-function vpTab(tab) {
-  document.getElementById('vp-panel-map').style.display = tab==='map' ? 'flex' : 'none';
-  document.getElementById('vp-panel-trip').style.display = tab==='trip' ? 'block' : 'none';
-  document.getElementById('vp-tab-map').style.background = tab==='map' ? '#1565c0' : 'rgba(255,255,255,0.1)';
-  document.getElementById('vp-tab-map').style.color = tab==='map' ? 'white' : 'rgba(255,255,255,0.7)';
-  document.getElementById('vp-tab-trip').style.background = tab==='trip' ? '#1565c0' : 'rgba(255,255,255,0.1)';
-  document.getElementById('vp-tab-trip').style.color = tab==='trip' ? 'white' : 'rgba(255,255,255,0.7)';
-  if (tab==='map' && !vpMapInited) { vpInitMap(); }
-  else if (tab==='map' && vpMap) { setTimeout(function(){ vpMap.invalidateSize(); }, 100); }
-}
-
-function vpInitMap() {
-  if (vpMapInited) return;
-  vpMapInited = true;
-  vpMap = L.map('vp-map').setView([52.5, 19.0], 6);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution:'© OpenStreetMap', maxZoom:18
-  }).addTo(vpMap);
-
-  // Draw trip route
-  vpDrawTripRoute();
-  vpLoadData();
-}
-
-function vpDrawTripRoute() {
-  // Draw trip polyline (dashed)
-  var latlngs = VP_TRIP_ROUTE.map(function(p){ return [p.lat, p.lon]; });
-  L.polyline(latlngs, {
-    color:'#9c27b0', weight:3, opacity:0.7, dashArray:'8,6'
-  }).addTo(vpMap);
-
-  // Add trip markers
-  VP_TRIP_ROUTE.forEach(function(p, idx) {
-    var colors = {airport:'#1565c0', base:'#7b1fa2', fair:'#e65100', meeting:'#2e7d32'};
-    var icons2 = {airport:'✈', base:'🏨', fair:'🎪', meeting:'🤝'};
-    var color = colors[p.type] || '#666';
-    var icon = L.divIcon({
-      className:'',
-      html:'<div style="background:'+color+';color:white;border:2px solid white;border-radius:6px;padding:3px 7px;font-size:11px;font-weight:700;box-shadow:0 2px 6px rgba(0,0,0,0.3);white-space:nowrap">'+icons2[p.type]+' '+p.name+'</div>',
-      iconAnchor:[0,0]
-    });
-    L.marker([p.lat, p.lon], {icon:icon}).addTo(vpMap);
+// ===== PRODUTOS (locais — tabela de preços) =====
+function loadProdutosLocais() {
+  DB.produtos = PRODUTOS_INICIAIS.map(function(p, i) {
+    return Object.assign({}, p, { id: i+1, estado: p.preco !== null ? 'ativo' : 'sem-preco' });
   });
 }
 
-async function vpLoadData() {
+// ===== SYNC COM GOOGLE SHEETS =====
+async function syncAll() {
+  showSyncStatus('A sincronizar...');
   try {
-    var resp = await fetch(VP_APPS_URL + '?action=getContacts');
-    var data = await resp.json();
-    var poland = data.filter(function(c){ return (c.country||'').toLowerCase()==='poland'; });
-    poland.forEach(function(c) {
-      var coords = vpGetCoords(c.city);
-      c.lat = coords ? coords[0] : null;
-      c.lon = coords ? coords[1] : null;
-      c.city_resolved = c.city || '';
+    // Run encomendas and clientes in parallel, notifications separately
+    await Promise.all([syncEncomendas(), syncClientes()]);
+    // Notifications are optional - don't fail if they timeout
+    try { await syncNotificacoes(); } catch(ne) { console.log('Notif skipped'); }
+    lastSync = new Date();
+    showSyncStatus('Sincronizado ' + formatTime(lastSync));
+    renderCurrentPage();
+    renderNotifBadge();
+  } catch(err) {
+    showSyncStatus('Erro de ligacao', true);
+    console.error('Sync error:', err);
+  }
+}
+
+async function syncEncomendas() {
+  const res = await apiGet('getEncomendas');
+  if (res && !res.error) DB.encomendas = res;
+}
+async function syncClientes() {
+  var res = await apiGet('getClientes');
+  if (res && !res.error && Array.isArray(res) && res.length > 0) {
+    DB.clientes = res;
+  } else {
+    // Fallback: clientes locais do data.js
+    DB.clientes = CLIENTES_INICIAIS.map(function(c, i) {
+      return typeof c === 'string' ? {id: i+1, nome: c} : c;
     });
-    vpContacts = poland;
-    Object.values(vpMarkers).forEach(function(m){ vpMap.removeLayer(m); });
-    vpMarkers = {};
-    vpContacts.forEach(function(c){ if(c.lat&&c.lon) vpAddMarker(c); });
-    vpUpdateStats();
-    vpRenderList();
-    var now = new Date();
-    document.getElementById('vp-last-update').textContent = 'Atualizado: '+now.toLocaleTimeString('pt-PT')+' · '+poland.length+' clientes';
-  } catch(e) { console.error('VP load error:', e); }
-}
-
-function vpAddMarker(c) {
-  var inRoute = vpRouteStops.some(function(s){return s.id===c.id;});
-  var marker = L.marker([c.lat,c.lon],{icon:vpMarkerIcon(c,inRoute)}).addTo(vpMap);
-  marker.bindPopup(function(){return vpPopup(c);},{className:'custom-popup',maxWidth:280});
-  marker.on('click',function(){marker.openPopup();});
-  vpMarkers[c.id] = marker;
-}
-
-function vpMarkerIcon(c, inRoute) {
-  var color = inRoute ? '#1565c0' : (VP_PRIORITY_COLORS[c.priority]||'#666');
-  var idx = vpRouteStops.findIndex(function(s){return s.id===c.id;});
-  var label = inRoute&&idx>=0 ? (idx+1) : (c.priority||'?');
-  var size = c.priority==='A'?34:(c.priority==='B'?30:26);
-  return L.divIcon({
-    className:'',
-    html:'<div style="width:'+size+'px;height:'+size+'px;border-radius:50% 50% 50% 0;background:'+color+';border:2px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;color:white;font-weight:800;font-size:'+(size>30?12:10)+'px;transform:rotate(-45deg)"><span style="transform:rotate(45deg)">'+label+'</span></div>',
-    iconSize:[size,size],iconAnchor:[size/2,size],popupAnchor:[0,-size]
-  });
-}
-
-function vpPopup(c) {
-  var color = VP_PRIORITY_COLORS[c.priority]||'#666';
-  var inRoute = vpRouteStops.some(function(s){return s.id===c.id;});
-  var div = document.createElement('div');
-  div.innerHTML = '<div class="popup-header" style="background:'+color+'"><span style="background:rgba(255,255,255,0.2);padding:2px 7px;border-radius:10px;font-size:11px;margin-right:6px">P.'+c.priority+'</span>'+c.company+'</div>'
-    +'<div class="popup-body">'
-    +'<div class="popup-row"><i class="fas fa-map-marker-alt"></i><span>'+(c.city_resolved||'N/D')+'</span></div>'
-    +(c.phone?'<div class="popup-row"><i class="fas fa-phone"></i><span>'+c.phone+'</span></div>':'')
-    +(c.next_step?'<div class="popup-row"><i class="fas fa-arrow-right"></i><span style="color:#1565c0;font-weight:600;font-size:11px">'+c.next_step+'</span></div>':'')
-    +'</div>'
-    +'<div class="popup-actions">'
-    +(inRoute
-      ?'<button class="popup-btn popup-btn-remove" onclick="vpRemoveRoute('+c.id+');vpMap.closePopup()"><i class=\"fas fa-minus\"></i> Remover da Rota</button>'
-      :'<button class="popup-btn popup-btn-add" onclick="vpAddRoute('+c.id+');vpMap.closePopup()"><i class=\"fas fa-plus\"></i> Adicionar à Rota</button>')
-    +'</div>';
-  return div;
-}
-
-function vpUpdateMarker(id) {
-  var c = vpContacts.find(function(x){return x.id===id;});
-  if(!c||!vpMarkers[id]) return;
-  var inRoute = vpRouteStops.some(function(s){return s.id===id;});
-  vpMarkers[id].setIcon(vpMarkerIcon(c,inRoute));
-  vpMarkers[id].setPopupContent(vpPopup(c));
-}
-
-function vpAddRoute(id) {
-  var c = vpContacts.find(function(x){return x.id===id;});
-  if(!c||vpRouteStops.some(function(s){return s.id===id;})) return;
-  if(!c.lat) { alert('Este cliente não tem localização GPS'); return; }
-  vpRouteStops.push(c);
-  vpUpdateMarker(id); vpRenderRoute(); vpRenderList(); vpUpdateStats();
-  vpSideTab('route');
-}
-
-function vpRemoveRoute(id) {
-  vpRouteStops = vpRouteStops.filter(function(s){return s.id!==id;});
-  vpUpdateMarker(id); vpRenderRoute(); vpRenderList(); vpUpdateStats();
-  if(vpRoutingControl){ vpMap.removeControl(vpRoutingControl); vpRoutingControl=null; }
-  document.getElementById('vp-route-info').style.display='none';
-}
-
-function vpClearRoute() {
-  var ids = vpRouteStops.map(function(s){return s.id;});
-  vpRouteStops=[];
-  ids.forEach(function(id){vpUpdateMarker(id);});
-  if(vpRoutingControl){vpMap.removeControl(vpRoutingControl);vpRoutingControl=null;}
-  document.getElementById('vp-route-info').style.display='none';
-  vpRenderRoute(); vpRenderList(); vpUpdateStats();
-}
-
-function vpSelectAllA() {
-  vpContacts.filter(function(c){return c.priority==='A'&&c.lat&&c.lon;}).forEach(function(c){
-    if(!vpRouteStops.some(function(s){return s.id===c.id;})){ vpRouteStops.push(c); vpUpdateMarker(c.id); }
-  });
-  vpRenderRoute(); vpRenderList(); vpUpdateStats(); vpSideTab('route');
-}
-
-function vpMoveStop(idx,dir) {
-  var ni=idx+dir;
-  if(ni<0||ni>=vpRouteStops.length) return;
-  var tmp=vpRouteStops[idx]; vpRouteStops[idx]=vpRouteStops[ni]; vpRouteStops[ni]=tmp;
-  vpRouteStops.forEach(function(s){vpUpdateMarker(s.id);});
-  vpRenderRoute();
-}
-
-function vpCalcRoute() {
-  if(vpRouteStops.length<2){alert('Adicione pelo menos 2 clientes');return;}
-  if(vpRoutingControl){vpMap.removeControl(vpRoutingControl);vpRoutingControl=null;}
-  var wps = vpRouteStops.map(function(s){return L.latLng(s.lat,s.lon);});
-  vpRoutingControl = L.Routing.control({
-    waypoints:wps, routeWhileDragging:false, addWaypoints:false,
-    draggableWaypoints:false, fitSelectedRoutes:true, show:false,
-    lineOptions:{styles:[{color:'#1565c0',weight:4,opacity:0.8}]},
-    createMarker:function(){return null;}
-  }).addTo(vpMap);
-  vpRoutingControl.on('routesfound',function(e){
-    var r=e.routes[0];
-    var dist=(r.summary.totalDistance/1000).toFixed(0);
-    var time=Math.round(r.summary.totalTime/60);
-    var h=Math.floor(time/60),m=time%60;
-    document.getElementById('vp-ri-stops').textContent=vpRouteStops.length;
-    document.getElementById('vp-ri-dist').textContent=dist+' km';
-    document.getElementById('vp-ri-time').textContent=(h>0?h+'h ':'')+m+'min';
-    document.getElementById('vp-route-info').style.display='block';
-  });
-}
-
-function vpOptimize() {
-  if(vpRouteStops.length<3){alert('Adicione pelo menos 3 clientes');return;}
-  var dist=function(a,b){return Math.sqrt(Math.pow(a.lat-b.lat,2)+Math.pow(a.lon-b.lon,2));};
-  var rem=[].concat(vpRouteStops.slice(1)), opt=[vpRouteStops[0]], cur=vpRouteStops[0];
-  while(rem.length>0){
-    var near=rem.reduce(function(best,c){return dist(cur,c)<dist(cur,best)?c:best;});
-    opt.push(near); rem=rem.filter(function(c){return c.id!==near.id;}); cur=near;
   }
-  vpRouteStops=opt;
-  vpRouteStops.forEach(function(s){vpUpdateMarker(s.id);});
-  vpRenderRoute(); vpCalcRoute();
+}
+async function syncNotificacoes() {
+  try {
+    const dest = UTILIZADOR.isGerente ? 'gerente' : UTILIZADOR.nome;
+    const res = await apiGet('getNotificacoes', { destinatario: dest });
+    if (res && !res.error) DB.notificacoes = res;
+  } catch(e) {
+    console.log('syncNotificacoes skipped:', e.message);
+  }
 }
 
-function vpRenderRoute() {
-  var list=document.getElementById('vp-route-stops');
-  var actions=document.getElementById('vp-route-actions');
-  var emptyA=document.getElementById('vp-route-empty-actions');
-  document.getElementById('vp-route-badge').textContent=vpRouteStops.length;
-  if(vpRouteStops.length===0){
-    list.innerHTML='<div style="text-align:center;color:#999;font-size:13px;padding:20px 10px"><i class="fas fa-map-marked-alt" style="font-size:28px;color:#ddd;display:block;margin-bottom:8px"></i>Adicione clientes à rota</div>';
-    actions.style.display='none'; emptyA.style.display='block'; return;
+// ===== API HELPERS (JSONP para ficheiros locais) =====
+function apiGet(action, params) {
+  return new Promise(function(resolve, reject) {
+    params = params || {};
+    params.action = action;
+    params.t = Date.now();
+    var cbName = '_cb_' + Date.now() + '_' + Math.floor(Math.random()*9999);
+    params.callback = cbName;
+    var qs = Object.keys(params).map(function(k){ return k+'='+encodeURIComponent(params[k]); }).join('&');
+    var script = document.createElement('script');
+    var timeout = setTimeout(function(){ reject(new Error('Timeout')); cleanup(); }, 10000);
+    window[cbName] = function(data) { resolve(data); cleanup(); };
+    function cleanup(){ clearTimeout(timeout); delete window[cbName]; if(script.parentNode) script.parentNode.removeChild(script); }
+    script.onerror = function(){ reject(new Error('Script error')); cleanup(); };
+    script.src = APPS_SCRIPT_URL + '?' + qs;
+    document.head.appendChild(script);
+  });
+}
+
+async function apiPost(action, data) {
+  // POST via fetch com no-cors fallback para JSONP
+  var body = Object.assign({ action: action }, data);
+  try {
+    var res = await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify(body)
+    });
+    return res.json();
+  } catch(e) {
+    // Fallback: encode POST as GET with JSONP
+    return apiGet(action + '_post', body);
   }
-  emptyA.style.display='none'; actions.style.display='flex';
-  list.innerHTML=vpRouteStops.map(function(s,i){
-    return '<div style="display:flex;align-items:center;gap:7px;padding:7px 9px;background:#f8f9fa;border-radius:8px;border:1px solid #e0e0e0;margin-bottom:5px">'
-      +'<div style="width:22px;height:22px;border-radius:50%;background:'+(VP_PRIORITY_COLORS[s.priority]||'#666')+';color:white;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">'+(i+1)+'</div>'
-      +'<div style="flex:1"><div style="font-size:12px;font-weight:700">'+s.company+'</div><div style="font-size:11px;color:#666">'+s.city_resolved+'</div></div>'
-      +'<div style="display:flex;flex-direction:column;gap:1px">'
-      +'<button onclick="vpMoveStop('+i+',-1)" '+(i===0?'disabled':'')+' style="background:none;border:none;color:#999;cursor:pointer;font-size:11px;padding:1px 3px"><i class="fas fa-chevron-up"></i></button>'
-      +'<button onclick="vpMoveStop('+i+',1)" '+(i===vpRouteStops.length-1?'disabled':'')+' style="background:none;border:none;color:#999;cursor:pointer;font-size:11px;padding:1px 3px"><i class="fas fa-chevron-down"></i></button>'
-      +'</div>'
-      +'<button onclick="vpRemoveRoute('+s.id+')" style="background:none;border:none;color:#e53935;cursor:pointer;font-size:13px;padding:2px 5px"><i class="fas fa-times"></i></button>'
-      +'</div>';
+}
+
+function showSyncStatus(msg, isError) {
+  var el = document.getElementById('syncStatus');
+  if (!el) return;
+  el.textContent = msg;
+  el.style.color = isError ? 'var(--danger)' : 'var(--text-muted)';
+}
+
+function renderCurrentPage() {
+  var active = document.querySelector('.page.active');
+  if (!active) return;
+  var page = active.id.replace('page-', '');
+  if (page === 'dashboard') updateDashboard();
+  else if (page === 'encomendas') renderEncomendas();
+  else if (page === 'clientes') renderClientes();
+  else if (page === 'nova-encomenda') {} // don't reset form
+}
+
+// ===== NAVIGATION =====
+function initNav() {
+  document.querySelectorAll('.nav-item').forEach(function(item) {
+    item.addEventListener('click', function(e) { e.preventDefault(); ofNavigateTo(item.dataset.page); });
+  });
+}
+function ofNavigateTo(page) {
+  document.querySelectorAll('.nav-item').forEach(function(i){i.classList.remove('active');});
+  document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
+  var nav = document.querySelector('.nav-item[data-page="'+page+'"]');
+  if (nav) nav.classList.add('active');
+  var pg = document.getElementById('page-'+page);
+  if (pg) pg.classList.add('active');
+  var titles = {'dashboard':'Dashboard','nova-encomenda':'Nova Encomenda','encomendas':'Encomendas','clientes':'Clientes','produtos':'Tabela de Precos','novo-cliente':'Novo Cliente'};
+  var pt = document.getElementById('pageTitle');
+  if (pt) pt.textContent = titles[page] || page;
+  if (page === 'dashboard') updateDashboard();
+  if (page === 'encomendas') renderEncomendas();
+  if (page === 'clientes') renderClientes();
+  if (page === 'produtos') renderProdutos();
+  var nd = document.getElementById('notifDropdown');
+  if (nd) nd.classList.remove('open');
+  var pd = document.getElementById('profileDropdown');
+  if (pd) pd.classList.remove('open');
+}
+
+// ===== NOTIFICATIONS =====
+function initNotifications() {
+  var btn = document.getElementById('notifBtn');
+  var dd = document.getElementById('notifDropdown');
+  if (!btn || !dd) return;
+  btn.addEventListener('click', function(e) {
+    e.stopPropagation();
+    dd.classList.toggle('open');
+    if (dd.classList.contains('open')) renderNotifList();
+  });
+  var markAll = document.getElementById('btnMarkAllRead');
+  if (markAll) markAll.addEventListener('click', async function() {
+    const dest = UTILIZADOR.isGerente ? 'gerente' : UTILIZADOR.nome;
+    await apiPost('marcarTodasLidas', { destinatario: dest });
+    DB.notificacoes.forEach(function(n){n.lida=true;});
+    renderNotifBadge(); renderNotifList();
+  });
+  document.addEventListener('click', function(e) {
+    if (btn && !btn.contains(e.target)) dd.classList.remove('open');
+  });
+}
+function renderNotifBadge() {
+  var u = DB.notificacoes.filter(function(n){return !n.lida;}).length;
+  var b = document.getElementById('notifBadge');
+  if (!b) return;
+  if (u > 0) { b.textContent = u > 9 ? '9+' : u; b.style.display = 'flex'; }
+  else b.style.display = 'none';
+}
+function renderNotifList() {
+  var list = document.getElementById('notifList');
+  if (!list) return;
+  if (!DB.notificacoes.length) { list.innerHTML = '<div class="notif-empty">Sem notificacoes</div>'; return; }
+  list.innerHTML = DB.notificacoes.slice(0,20).map(function(n) {
+    var icon = n.tipo==='pending'?'fa-clock':n.tipo==='approved'?'fa-check':'fa-xmark';
+    return '<div class="notif-item '+(n.lida?'':'unread')+'" onclick="onNotifClick('+n.id+')">' +
+      '<div class="notif-icon '+n.tipo+'"><i class="fa-solid '+icon+'"></i></div>' +
+      '<div><div class="notif-title">'+n.titulo+'</div><div class="notif-desc">'+n.descricao+'</div><div class="notif-time">'+timeAgo(n.data)+'</div></div>' +
+      (!n.lida?'<div class="notif-dot"></div>':'') + '</div>';
+  }).join('');
+}
+async function onNotifClick(id) {
+  var n = DB.notificacoes.find(function(x){return x.id===id;}); if(!n) return;
+  if (!n.lida) { await apiPost('marcarNotifLida', {id: id}); n.lida = true; }
+  renderNotifBadge(); renderNotifList();
+  document.getElementById('notifDropdown').classList.remove('open');
+  if (n.encId) { navigateTo('encomendas'); setTimeout(function(){viewEncomenda(n.encId);},300); }
+}
+
+// ===== DASHBOARD (gerente only) =====
+function updateDashboard() {
+  var sp = document.getElementById('statProdutos'); if(sp) sp.textContent = DB.produtos.filter(function(p){return p.estado==='ativo';}).length;
+  var sc = document.getElementById('statClientes'); if(sc) sc.textContent = DB.clientes.length;
+  var spe = document.getElementById('statPendentes'); if(spe) spe.textContent = DB.encomendas.filter(function(e){return e.estado==='pendente';}).length;
+  var sa = document.getElementById('statAprovadas'); if(sa) sa.textContent = DB.encomendas.filter(function(e){return e.estado==='aprovada';}).length;
+
+  var recentEl = document.getElementById('recentOrders');
+  if (recentEl) {
+    var recent = DB.encomendas.slice().sort(function(a,b){return b.id-a.id;}).slice(0,6);
+    recentEl.innerHTML = recent.length ? recent.map(function(e) {
+      return '<div class="recent-order-item" style="cursor:pointer" onclick="viewEncomenda('+e.id+')">' +
+        '<div><div style="font-weight:700;font-size:13px">#'+fmtId(e.id)+' <span class="badge-status badge-'+e.estado+'" style="font-size:10px">'+estadoLabel(e.estado)+'</span></div><div style="font-size:12px;color:var(--text-secondary)">'+e.clienteNome+'</div></div>' +
+        '<div style="text-align:right"><div style="font-weight:700;color:var(--primary);font-size:13px">'+fmtCur(e.total)+'</div><div style="font-size:11px;color:var(--text-muted)">'+fmtDate(e.data)+'</div></div>' +
+      '</div>';
+    }).join('') : '<p style="text-align:center;padding:20px;color:var(--text-muted)">Sem encomendas ainda</p>';
+  }
+
+  updatePendingPanel();
+}
+
+function updatePendingPanel() {
+  var panel = document.getElementById('pendingPanel'); if(!panel) return;
+  var pendentes = DB.encomendas.filter(function(e){return e.estado==='pendente';});
+  if (!pendentes.length) { panel.style.display='none'; return; }
+  panel.style.display = 'block';
+  var pc = document.getElementById('pendingCount'); if(pc) pc.textContent = pendentes.length;
+  var pl = document.getElementById('pendingList');
+  if (pl) pl.innerHTML = pendentes.map(function(e) {
+    return '<div class="pending-order-item">' +
+      '<div><div class="pending-order-num">#'+fmtId(e.id)+' — '+e.clienteNome+'</div><div class="pending-order-meta">'+e.itens.length+' item(s) · '+e.criadoPor+' · '+fmtDate(e.data)+'</div></div>' +
+      '<div class="pending-order-total">'+fmtCur(e.total)+'</div>' +
+      '<div class="pending-order-actions">' +
+        '<button class="btn btn-success btn-sm" onclick="changeEstado('+e.id+',\'aprovada\')"><i class="fa-solid fa-check"></i> Aprovar</button>' +
+        '<button class="btn btn-danger btn-sm" onclick="changeEstado('+e.id+',\'rejeitada\')"><i class="fa-solid fa-xmark"></i> Rejeitar</button>' +
+        '<button class="btn btn-secondary btn-sm" onclick="viewEncomenda('+e.id+')"><i class="fa-solid fa-eye"></i></button>' +
+      '</div></div>';
   }).join('');
 }
 
-function vpRenderList() {
-  var list=document.getElementById('vp-clients-list');
-  var search=(document.getElementById('vp-search').value||'').toLowerCase();
-  var filtered=vpContacts.filter(function(c){
-    if(vpFilter!=='all'&&c.priority!==vpFilter) return false;
-    if(search&&!c.company.toLowerCase().includes(search)&&!(c.city_resolved||'').toLowerCase().includes(search)) return false;
-    return true;
+// ===== ENCOMENDAS =====
+function initEncomendas() {
+  var fe = document.getElementById('filterEncomendas');
+  if (fe) fe.addEventListener('input', renderEncomendas);
+  var fs = document.getElementById('filterEstadoEncomenda');
+  if (fs) fs.addEventListener('change', renderEncomendas);
+}
+function renderEncomendas() {
+  var searchEl = document.getElementById('filterEncomendas');
+  var estadoEl = document.getElementById('filterEstadoEncomenda');
+  var search = searchEl ? searchEl.value.toLowerCase() : '';
+  var estado = estadoEl ? estadoEl.value : '';
+
+  var filtered = DB.encomendas.filter(function(e) {
+    var matchSearch = !search || e.clienteNome.toLowerCase().indexOf(search)>=0 || String(e.id).indexOf(search)>=0;
+    var matchEstado = !estado || e.estado === estado;
+    // Comercial vê apenas as suas
+    var matchUser = UTILIZADOR.isGerente || e.criadoPor === UTILIZADOR.nome;
+    return matchSearch && matchEstado && matchUser;
+  }).sort(function(a,b){return b.id-a.id;});
+
+  var tbody = document.getElementById('bodyEncomendas');
+  var empty = document.getElementById('emptyEncomendas');
+  if (!filtered.length) {
+    if (tbody) tbody.innerHTML = '';
+    if (empty) empty.style.display = 'block';
+    return;
+  }
+  if (empty) empty.style.display = 'none';
+  if (!tbody) return;
+  tbody.innerHTML = filtered.map(function(e) {
+    var acoes = '<button class="btn btn-secondary btn-xs" onclick="viewEncomenda('+e.id+')"><i class="fa-solid fa-eye"></i></button>';
+    if (UTILIZADOR.isGerente && e.estado === 'pendente') {
+      acoes += '<button class="btn btn-success btn-xs" onclick="changeEstado('+e.id+',\'aprovada\')"><i class="fa-solid fa-check"></i></button>';
+      acoes += '<button class="btn btn-danger btn-xs" onclick="changeEstado('+e.id+',\'rejeitada\')"><i class="fa-solid fa-xmark"></i></button>';
+    }
+    if (UTILIZADOR.isGerente) acoes += '<button class="btn btn-danger btn-xs" onclick="deleteEncomenda('+e.id+')"><i class="fa-solid fa-trash"></i></button>';
+    return '<tr>' +
+      '<td><strong>#'+fmtId(e.id)+'</strong></td>' +
+      '<td>'+fmtDate(e.data)+'</td>' +
+      '<td style="font-weight:500">'+e.clienteNome+'</td>' +
+      '<td style="color:var(--text-secondary)">'+(e.itens?e.itens.length:0)+'</td>' +
+      '<td><strong style="color:var(--primary)">'+fmtCur(e.total)+'</strong></td>' +
+      '<td><span class="badge-status badge-'+e.estado+'">'+estadoLabel(e.estado)+'</span></td>' +
+      (UTILIZADOR.isGerente ? '<td style="font-size:12px;color:var(--text-secondary)">'+e.criadoPor+'</td>' : '') +
+      '<td><div class="actions">'+acoes+'</div></td>' +
+    '</tr>';
+  }).join('');
+}
+function estadoLabel(e){return{pendente:'Pendente',aprovada:'Aprovada',rejeitada:'Rejeitada'}[e]||e;}
+
+async function changeEstado(id, novoEstado) {
+  showToast('A atualizar...','info');
+  var res = await apiPost('updateEstado', {id: id, estado: novoEstado});
+  if (res && res.ok) {
+    await syncAll();
+    closeModal('modalDetalheEncomenda');
+    showToast('Encomenda #'+fmtId(id)+' '+novoEstado+'.', novoEstado==='aprovada'?'success':'warning');
+  } else {
+    showToast('Erro ao atualizar.','error');
+  }
+}
+
+async function deleteEncomenda(id) {
+  if (!confirm('Eliminar esta encomenda?')) return;
+  var res = await apiPost('deleteEncomenda', {id: id});
+  if (res && res.ok) { await syncAll(); showToast('Encomenda eliminada.','warning'); }
+  else showToast('Erro ao eliminar.','error');
+}
+
+function viewEncomenda(id) {
+  var e = DB.encomendas.find(function(x){return x.id===id;}); if(!e) return;
+  var title = document.getElementById('modalDetalheTitle');
+  if (title) title.textContent = 'Encomenda #'+fmtId(e.id);
+  var itens = e.itens || [];
+  var rows = itens.map(function(i){
+    return '<tr><td><strong>'+i.produtoNome+'</strong></td><td style="color:var(--text-muted)">'+(i.origem||'-')+'</td><td style="color:var(--text-muted);font-size:11px">'+(i.embalagem||'-')+'</td><td>'+i.quantidade+' '+i.unidade+'</td><td style="color:var(--text-muted);font-style:italic">'+(i.precoTabela!==undefined?fmtCur(i.precoTabela):'-')+'</td><td style="font-weight:600">'+fmtCur(i.precoUnit)+'</td></tr>';
+  }).join('');
+  var body = document.getElementById('modalDetalheBody');
+  if (body) body.innerHTML =
+    '<div class="detail-section"><h4>Informacoes</h4><div class="detail-grid">' +
+      '<div class="detail-item"><span class="label">Numero</span><span class="value">#'+fmtId(e.id)+'</span></div>' +
+      '<div class="detail-item"><span class="label">Data</span><span class="value">'+fmtDate(e.data)+'</span></div>' +
+      '<div class="detail-item"><span class="label">Cliente</span><span class="value">'+e.clienteNome+'</span></div>' +
+      '<div class="detail-item"><span class="label">Estado</span><span class="value"><span class="badge-status badge-'+e.estado+'">'+estadoLabel(e.estado)+'</span></span></div>' +
+      '<div class="detail-item"><span class="label">Criado por</span><span class="value">'+e.criadoPor+'</span></div>' +
+      '<div class="detail-item"><span class="label">Data criacao</span><span class="value">'+fmtDate(e.criadoEm)+'</span></div>' +
+    '</div>'+(e.notas?'<div style="margin-top:10px;padding:10px;background:var(--bg);border-radius:6px;font-size:13px">'+e.notas+'</div>':'')+'</div>' +
+    '<div class="detail-section"><h4>Produtos</h4>' +
+      '<table class="data-table" style="font-size:12px"><thead><tr><th>Produto</th><th>Origem</th><th>Embalagem</th><th>Qtd.</th><th>P. Tabela</th><th>Meu Preco</th></tr></thead><tbody>'+rows+'</tbody></table>' +
+    '</div>' +
+    '<div style="display:flex;justify-content:flex-end;margin-top:8px"><div style="font-size:17px;font-weight:800;color:var(--primary)">Total: '+fmtCur(e.total)+'</div></div>';
+  var footer = document.getElementById('modalDetalheFooter');
+  if (footer) footer.innerHTML =
+    '<button class="btn btn-outline" onclick="closeModal(\'modalDetalheEncomenda\')">Fechar</button>' +
+    (UTILIZADOR.isGerente && e.estado==='pendente' ?
+      '<button class="btn btn-success" onclick="changeEstado('+e.id+',\'aprovada\')"><i class="fa-solid fa-check"></i> Aprovar</button>' +
+      '<button class="btn btn-danger" onclick="changeEstado('+e.id+',\'rejeitada\')"><i class="fa-solid fa-xmark"></i> Rejeitar</button>' : '');
+  openModal('modalDetalheEncomenda');
+}
+
+// ===== CLIENTES =====
+function initNovoCliente() {
+  var btn = document.getElementById('btnSaveCliente') || document.getElementById('btnNovoClienteSave');
+  if (btn) btn.addEventListener('click', saveCliente);
+  var btnNovo = document.getElementById('btnNovoCliente');
+  if (btnNovo) btnNovo.addEventListener('click', function(){ openModal('modalCliente'); });
+}
+function renderClientes() {
+  var search = (document.getElementById('filterClientes')||{}).value || '';
+  search = search.toLowerCase();
+  var filtered = DB.clientes.filter(function(c){
+    return !search || c.nome.toLowerCase().indexOf(search)>=0 || (c.nif&&c.nif.indexOf(search)>=0);
   });
-  if(!filtered.length){list.innerHTML='<div style="text-align:center;color:#999;padding:15px;font-size:12px">Nenhum cliente encontrado</div>';return;}
-  list.innerHTML=filtered.map(function(c){
-    var inRoute=vpRouteStops.some(function(s){return s.id===c.id;});
-    var ri=vpRouteStops.findIndex(function(s){return s.id===c.id;});
-    return '<div class="vp-card '+(inRoute?'in-route':'')+'" id="vpc-'+c.id+'" onclick="vpFocus('+c.id+')">'
-      +(inRoute?'<div class="vp-route-num">'+(ri+1)+'</div>':'')
-      +'<div style="display:flex;align-items:center;gap:7px;margin-bottom:3px">'
-      +'<div style="width:20px;height:20px;border-radius:50%;background:'+(VP_PRIORITY_COLORS[c.priority]||'#999')+';color:white;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0">'+(c.priority||'?')+'</div>'
-      +'<div style="font-size:12px;font-weight:700;color:#0d2137;flex:1">'+c.company+'</div>'
-      +'</div>'
-      +'<div style="font-size:11px;color:#666;margin-bottom:5px"><i class="fas fa-map-marker-alt" style="color:#1565c0;font-size:10px"></i> '+(c.city_resolved||'N/D')+'</div>'
-      +'<button onclick="event.stopPropagation();'+(inRoute?'vpRemoveRoute('+c.id+')':'vpAddRoute('+c.id+')')+'" style="padding:3px 9px;border:1.5px solid '+(inRoute?'#e53935':'#1565c0')+';border-radius:20px;background:none;color:'+(inRoute?'#e53935':'#1565c0')+';font-size:11px;font-weight:600;cursor:pointer">'
-      +'<i class="fas fa-'+(inRoute?'minus':'plus')+'"></i> '+(inRoute?'Remover':'+ Rota')+'</button>'
-      +'</div>';
+  var total = filtered.length;
+  var totalPages = Math.ceil(total/PAGE_SIZE_CLI);
+  if (clientesPage > totalPages) clientesPage = Math.max(1,totalPages);
+  var start = (clientesPage-1)*PAGE_SIZE_CLI;
+  var paged = filtered.slice(start, start+PAGE_SIZE_CLI);
+  var info = document.getElementById('clientesInfo');
+  if (info) info.textContent = 'A mostrar '+paged.length+' de '+total+' cliente(s)';
+  var tbody = document.getElementById('bodyClientes');
+  var empty = document.getElementById('emptyClientes');
+  if (!paged.length) { if(tbody)tbody.innerHTML=''; if(empty)empty.style.display='block'; return; }
+  if (empty) empty.style.display='none';
+  if (!tbody) return;
+  var avatarColors=['#2e7d8c','#287878','#3c6478','#2e7d4f','#5c4a8a','#c47a1e','#b03a2e','#4a9aaa'];
+  tbody.innerHTML = paged.map(function(c,idx){
+    var enc = DB.encomendas.filter(function(e){return e.clienteId===c.id;}).length;
+    var col = avatarColors[c.id%avatarColors.length];
+    var init = c.nome.split(' ').filter(function(w){return w;}).slice(0,2).map(function(w){return w[0];}).join('').toUpperCase();
+    return '<tr>' +
+      '<td style="color:var(--text-muted);font-size:11px">'+(start+idx+1)+'</td>' +
+      '<td><div style="display:flex;align-items:center;gap:10px"><div style="width:30px;height:30px;border-radius:50%;background:'+col+';display:flex;align-items:center;justify-content:center;color:white;font-size:11px;font-weight:700;flex-shrink:0">'+init+'</div><div><div style="font-weight:600;font-size:13px">'+c.nome+'</div>'+(c.nif?'<div style="font-size:11px;color:var(--text-muted)">NIF: '+c.nif+'</div>':'')+'</div></div></td>' +
+      '<td>'+(enc>0?'<span style="color:var(--primary);font-weight:600">'+enc+' enc.</span>':'<span style="color:var(--text-muted)">—</span>')+'</td>' +
+      '<td><div class="actions"><button class="btn btn-secondary btn-xs" onclick="openEditCliente('+c.id+')"><i class="fa-solid fa-pen"></i></button></div></td>' +
+    '</tr>';
+  }).join('');
+}
+function openEditCliente(id) {
+  var c = DB.clientes.find(function(x){return x.id===id;}); if(!c) return;
+  editingClienteId = id;
+  var fields = {clienteId:c.id,clienteNome:c.nome,clienteNIF:c.nif||'',clienteEmail:c.email||'',clienteTelefone:c.telefone||'',clienteMorada:c.morada||'',clienteNotas:c.notas||''};
+  Object.keys(fields).forEach(function(k){var el=document.getElementById(k);if(el)el.value=fields[k];});
+  openModal('modalCliente');
+}
+async function saveCliente() {
+  var nome = (document.getElementById('clienteNome')||{}).value || (document.getElementById('ncNome')||{}).value || '';
+  nome = nome.trim();
+  if (!nome) { showToast('O nome e obrigatorio.','error'); return; }
+  var data = {
+    id: editingClienteId || null,
+    nome: nome,
+    nif: ((document.getElementById('clienteNIF')||document.getElementById('ncNIF')||{}).value||'').trim(),
+    email: ((document.getElementById('clienteEmail')||document.getElementById('ncEmail')||{}).value||'').trim(),
+    telefone: ((document.getElementById('clienteTelefone')||document.getElementById('ncTel')||{}).value||'').trim(),
+    morada: ((document.getElementById('clienteMorada')||document.getElementById('ncMorada')||{}).value||'').trim(),
+    notas: ((document.getElementById('clienteNotas')||document.getElementById('ncNotas')||{}).value||'').trim()
+  };
+  showToast('A guardar...','info');
+  var res = await apiPost('saveCliente', {data: data});
+  if (res && res.ok) {
+    editingClienteId = null;
+    closeModal('modalCliente');
+    await syncClientes();
+    renderClientes();
+    showToast('Cliente guardado!','success');
+    // Clear form
+    ['clienteNome','clienteNIF','clienteEmail','clienteTelefone','clienteMorada','clienteNotas','ncNome','ncNIF','ncEmail','ncTel','ncMorada','ncNotas'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
+  } else {
+    showToast('Erro ao guardar cliente.','error');
+  }
+}
+
+// ===== PRODUTOS (local) =====
+function renderProdutos() {
+  var search = ((document.getElementById('filterProdutos')||{}).value||'').toLowerCase();
+  var cat = (document.getElementById('filterCategoria')||{}).value||'';
+  var disp = (document.getElementById('filterDisponivel')||{}).value||'';
+  function getCat(p){return p.descricao.split(' ').slice(0,2).join(' ');}
+  var cats = [...new Set(DB.produtos.map(getCat))].sort();
+  var catSel = document.getElementById('filterCategoria');
+  if (catSel) {
+    var curCat = catSel.value;
+    catSel.innerHTML = '<option value="">Todas as categorias</option>'+cats.map(function(c){return '<option value="'+c+'" '+(c===curCat?'selected':'')+'>'+c+'</option>';}).join('');
+  }
+  var filtered = DB.produtos.filter(function(p){
+    var ms=!search||p.descricao.toLowerCase().indexOf(search)>=0||(p.origem&&p.origem.toLowerCase().indexOf(search)>=0);
+    var mc=!cat||getCat(p)===cat;
+    var md=!disp||(disp==='sim'&&p.preco!==null)||(disp==='nao'&&p.preco===null);
+    return ms&&mc&&md;
+  });
+  var total=filtered.length, totalPages=Math.ceil(total/PAGE_SIZE_PROD);
+  if(produtosPage>totalPages)produtosPage=Math.max(1,totalPages);
+  var start=(produtosPage-1)*PAGE_SIZE_PROD, paged=filtered.slice(start,start+PAGE_SIZE_PROD);
+  var info=document.getElementById('tableInfo'); if(info)info.textContent='A mostrar '+paged.length+' de '+total+' produto(s)';
+  var tbody=document.getElementById('bodyProdutos'), empty=document.getElementById('emptyProdutos');
+  if(!paged.length){if(tbody)tbody.innerHTML='';if(empty)empty.style.display='block';return;}
+  if(empty)empty.style.display='none';
+  if(!tbody)return;
+  tbody.innerHTML=paged.map(function(p,idx){
+    return '<tr>' +
+      '<td style="color:var(--text-muted);font-size:11px">'+(start+idx+1)+'</td>' +
+      '<td><strong>'+p.descricao+'</strong></td>' +
+      '<td style="color:var(--text-secondary);font-size:12px">'+(p.origem||'—')+'</td>' +
+      '<td style="font-size:12px">'+(p.calibre||'—')+'</td>' +
+      '<td style="font-size:12px;color:var(--text-secondary)">'+(p.embalagem||'—')+'</td>' +
+      '<td style="font-size:12px">'+(p.vidragem!==null&&p.vidragem!==undefined?(p.vidragem*100).toFixed(0)+'%':'—')+'</td>' +
+      '<td><code style="background:var(--bg2);padding:2px 6px;border-radius:3px;font-size:11px">'+p.unidade+'</code></td>' +
+      '<td>'+(p.preco!==null?'<strong style="color:var(--primary)">'+fmtCur(p.preco)+'</strong>':'<span style="color:var(--text-muted)">—</span>')+'</td>' +
+      '<td>'+(p.preco_palete!==null&&p.preco_palete!==undefined?'<span style="color:var(--text-secondary)">'+fmtCur(p.preco_palete)+'</span>':'—')+'</td>' +
+      '<td><span class="badge-status badge-'+(p.estado==='ativo'?'ativo':p.estado==='inativo'?'inativo':'sem-preco')+'">'+(p.estado==='ativo'?'Ativo':p.estado==='inativo'?'Inativo':'S/Preco')+'</span></td>' +
+    '</tr>';
   }).join('');
 }
 
-function vpFocus(id) {
-  var c=vpContacts.find(function(x){return x.id===id;});
-  if(!c||!c.lat) return;
-  vpMap.setView([c.lat,c.lon],11,{animate:true});
-  if(vpMarkers[id]) vpMarkers[id].openPopup();
+// ===== NOVA ENCOMENDA =====
+function initNovaEncomenda() {
+  var btnAdd = document.getElementById('btnAddItem');
+  if (btnAdd) btnAdd.addEventListener('click', addItem);
+  var btnSub = document.getElementById('btnSubmitOrder');
+  if (btnSub) btnSub.addEventListener('click', submitOrder);
+  var btnClr = document.getElementById('btnClearOrder');
+  if (btnClr) btnClr.addEventListener('click', clearOrder);
+}
+function setTodayDate(){var el=document.getElementById('orderData');if(el)el.value=new Date().toISOString().split('T')[0];}
+
+function onClienteSearch(val) {
+  var dd=document.getElementById('clienteDropdown');
+  var hid=document.getElementById('orderClienteId');
+  if(hid)hid.value='';
+  if(val.length<2){if(dd)dd.classList.remove('open');return;}
+  var q=val.toLowerCase();
+  var matches=DB.clientes.filter(function(c){return c.nome.toLowerCase().indexOf(q)>=0;}).slice(0,12);
+  if(!matches.length){if(dd)dd.classList.remove('open');return;}
+  if(dd){
+    dd.innerHTML=matches.map(function(c){
+      var h=c.nome.replace(new RegExp('('+val.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi'),'<mark>$1</mark>');
+      return '<div class="client-option" onclick="selCliente('+c.id+')">'+h+'</div>';
+    }).join('');
+    dd.classList.add('open');
+  }
+}
+function selCliente(id){
+  var c=DB.clientes.find(function(x){return x.id===id;}); if(!c)return;
+  var inp=document.getElementById('clienteSearchInput'); if(inp)inp.value=c.nome;
+  var hid=document.getElementById('orderClienteId'); if(hid)hid.value=id;
+  var dd=document.getElementById('clienteDropdown'); if(dd)dd.classList.remove('open');
+}
+document.addEventListener('click',function(e){
+  var inp=document.getElementById('clienteSearchInput');
+  var dd=document.getElementById('clienteDropdown');
+  if(inp&&dd&&!inp.contains(e.target))dd.classList.remove('open');
+});
+
+function addItem(){
+  var active=DB.produtos.filter(function(p){return p.estado==='ativo'&&p.preco!==null;});
+  if(!active.length){showToast('Sem produtos disponiveis.','error');return;}
+  currentOrderItems.push({id:Date.now(),produtoId:'',quantidade:1,unidade:'KG',precoVenda:null});
+  renderItems();
+}
+function renderItems(){
+  var container=document.getElementById('orderItemsList'),empty=document.getElementById('orderEmpty');
+  var active=DB.produtos.filter(function(p){return p.estado==='ativo'&&p.preco!==null;});
+  if(!currentOrderItems.length){if(container)container.innerHTML='';if(empty)empty.style.display='block';updateSummary();return;}
+  if(empty)empty.style.display='none';
+  var html='';
+  currentOrderItems.forEach(function(item){
+    var p=active.find(function(x){return x.id===item.produtoId;});
+    var base=p?p.preco:null, unid=item.unidade||(p?p.unidade:'KG')||'KG';
+    var pv=(item.precoVenda!==null&&item.precoVenda!==undefined)?item.precoVenda:(base||0);
+    var total=pv*(item.quantidade||1);
+    var pvVal=(item.precoVenda!==null&&item.precoVenda!==undefined)?item.precoVenda.toFixed(2):(base!==null?base.toFixed(2):'');
+    var baseFmt=base!==null?fmtCur(base):'-';
+    var totalFmt=fmtCur(total);
+    var opts=active.map(function(x){return '<option value="'+x.id+'" '+(x.id===item.produtoId?'selected':'')+'>'+x.descricao+(x.calibre?' - '+x.calibre:'')+(x.embalagem?' - '+x.embalagem:'')+'</option>';}).join('');
+    var unidOpts=['KG','UN','KG PLE','L','cx','h','m'].map(function(u){return '<option value="'+u+'" '+(u===unid?'selected':'')+'>'+u+'</option>';}).join('');
+    html+='<div class="order-item-row" data-id="'+item.id+'">'+
+      '<select class="input-select" style="font-size:11px;padding:5px 8px" onchange="onPC('+item.id+',this.value)"><option value="">- Produto -</option>'+opts+'</select>'+
+      '<div style="display:flex;gap:4px;align-items:center">'+
+        '<input type="number" class="input-text" value="'+(item.quantidade||1)+'" min="0.01" step="0.01" onchange="onQC('+item.id+',this.value)" style="font-size:11px;padding:5px 6px;text-align:right;width:54px;flex-shrink:0;"/>'+
+        '<select class="input-select" style="font-size:11px;padding:5px 4px;width:52px;flex-shrink:0;" onchange="onUC('+item.id+',this.value)">'+unidOpts+'</select>'+
+      '</div>'+
+      '<div style="display:flex;flex-direction:column;gap:1px">'+
+        '<input type="text" class="input-text" value="'+baseFmt+'" readonly style="background:var(--bg2);color:var(--text-muted);font-size:11px;font-style:italic;cursor:default;padding:5px 7px;text-align:right;"/>'+
+        '<span style="font-size:9px;color:var(--text-muted);padding-left:2px">tabela / '+unid+'</span>'+
+      '</div>'+
+      '<div style="display:flex;flex-direction:column;gap:1px">'+
+        '<div style="position:relative">'+
+          '<input type="number" class="input-text" value="'+pvVal+'" min="0" step="0.01" id="pv_'+item.id+'" onchange="onPVC('+item.id+',this.value)" onblur="onPVB('+item.id+')" style="font-size:11px;font-weight:700;border:2px solid var(--primary);color:var(--primary);padding:5px 22px 5px 7px;text-align:right;" placeholder="0,00"/>'+
+          '<span style="position:absolute;right:6px;top:50%;transform:translateY(-50%);font-size:10px;color:var(--primary);font-weight:700;pointer-events:none">€</span>'+
+        '</div>'+
+        '<span style="font-size:9px;color:var(--primary);padding-left:2px;font-weight:600">= '+totalFmt+'</span>'+
+      '</div>'+
+      '<button class="btn-remove-item" onclick="onRM('+item.id+')" style="width:24px;height:24px"><i class="fa-solid fa-xmark" style="font-size:11px"></i></button>'+
+    '</div>';
+  });
+  if(container)container.innerHTML=html;
+  updateSummary();
+}
+function onPC(id,val){var item=currentOrderItems.find(function(i){return i.id===id;});if(item){item.produtoId=parseInt(val)||'';item.precoVenda=null;var p=DB.produtos.find(function(x){return x.id===item.produtoId;});if(p)item.unidade=p.unidade||'KG';}renderItems();}
+function onQC(id,val){var item=currentOrderItems.find(function(i){return i.id===id;});if(item)item.quantidade=parseFloat(val)||1;renderItems();}
+function onUC(id,val){var item=currentOrderItems.find(function(i){return i.id===id;});if(item)item.unidade=val;renderItems();}
+function onPVC(id,val){var item=currentOrderItems.find(function(i){return i.id===id;});if(item)item.precoVenda=val!==''?parseFloat(val):null;renderItems();}
+function onPVB(id){var item=currentOrderItems.find(function(i){return i.id===id;});var el=document.getElementById('pv_'+id);if(el&&item&&item.precoVenda!==null)el.value=item.precoVenda.toFixed(2);updateSummary();}
+function onRM(id){currentOrderItems=currentOrderItems.filter(function(i){return i.id!==id;});renderItems();}
+function updateSummary(){
+  var total=0,count=0;
+  currentOrderItems.forEach(function(item){var p=DB.produtos.find(function(x){return x.id===item.produtoId;});if(!p)return;var pv=(item.precoVenda!==null&&item.precoVenda!==undefined)?item.precoVenda:(p.preco||0);total+=pv*(item.quantidade||1);count++;});
+  var st=document.getElementById('summarySubtotal');if(st)st.textContent=fmtCur(total);
+  var sd=document.getElementById('summaryDesconto');if(sd)sd.textContent='-';
+  var stot=document.getElementById('summaryTotal');if(stot)stot.textContent=fmtCur(total);
+  var si=document.getElementById('summaryItems');if(si)si.textContent=count+' item(s)';
+}
+function clearOrder(){
+  if(currentOrderItems.length>0&&!confirm('Limpar encomenda?'))return;
+  currentOrderItems=[];
+  var inp=document.getElementById('clienteSearchInput');if(inp)inp.value='';
+  var hid=document.getElementById('orderClienteId');if(hid)hid.value='';
+  var not=document.getElementById('orderNotas');if(not)not.value='';
+  setTodayDate();renderItems();
+}
+async function submitOrder(){
+  var clienteId=parseInt((document.getElementById('orderClienteId')||{}).value||0);
+  if(!clienteId){showToast('Selecione um cliente.','error');return;}
+  if(!currentOrderItems.length){showToast('Adicione pelo menos um item.','error');return;}
+  if(currentOrderItems.some(function(i){return !i.produtoId;})){showToast('Selecione produto em todos os itens.','error');return;}
+  var cliente=DB.clientes.find(function(c){return c.id===clienteId;});
+  var itens=currentOrderItems.map(function(item){
+    var p=DB.produtos.find(function(x){return x.id===item.produtoId;});
+    var pv=(item.precoVenda!==null&&item.precoVenda!==undefined)?item.precoVenda:p.preco;
+    var qty=item.quantidade||1,tot=pv*qty;
+    return{produtoId:p.id,produtoNome:p.descricao,origem:p.origem,embalagem:p.embalagem,unidade:item.unidade||p.unidade||'KG',precoTabela:p.preco,precoUnit:pv,quantidade:qty,desconto:0,totalSemIVA:tot,total:tot};
+  });
+  var total=itens.reduce(function(s,i){return s+i.total;},0);
+  showToast('A submeter...','info');
+  var res=await apiPost('saveEncomenda',{data:{clienteNome:cliente.nome,clienteId:clienteId,data:(document.getElementById('orderData')||{}).value||'',notas:((document.getElementById('orderNotas')||{}).value||'').trim(),itens:itens,total:total,criadoPor:UTILIZADOR.nome}});
+  if(res&&res.ok){
+    clearOrder();
+    await syncAll();
+    showToast('Encomenda #'+fmtId(res.id)+' submetida! Aguarda aprovacao.','success');
+    setTimeout(function(){navigateTo('encomendas');},1000);
+  } else {
+    showToast('Erro ao submeter. Verifica a ligacao.','error');
+    console.error(res);
+  }
 }
 
-function vpSetFilter(f,btn) {
-  vpFilter=f;
-  document.querySelectorAll('.vp-filter').forEach(function(b){b.classList.remove('active');});
-  btn.classList.add('active');
-  vpRenderList();
+// ===== MODALS =====
+function openModal(id){var el=document.getElementById(id);if(el)el.classList.add('open');}
+function closeModal(id){var el=document.getElementById(id);if(el)el.classList.remove('open');}
+document.addEventListener('click',function(e){if(e.target.classList.contains('modal-overlay'))e.target.classList.remove('open');});
+
+// ===== TOAST =====
+function showToast(msg,type){
+  type=type||'info';
+  var icons={success:'fa-check-circle',error:'fa-circle-xmark',warning:'fa-triangle-exclamation',info:'fa-info-circle'};
+  var t=document.createElement('div');t.className='toast '+type;
+  t.innerHTML='<i class="fa-solid '+icons[type]+'"></i><span>'+msg+'</span>';
+  var tc=document.getElementById('toastContainer');if(tc)tc.appendChild(t);
+  setTimeout(function(){t.style.opacity='0';t.style.transform='translateX(20px)';t.style.transition='0.3s';setTimeout(function(){t.remove();},300);},4000);
 }
 
-function vpSideTab(tab) {
-  document.getElementById('vp-panel-clients').style.display=tab==='clients'?'flex':'none';
-  document.getElementById('vp-panel-route').style.display=tab==='route'?'flex':'none';
-  document.getElementById('vp-side-clients').style.background=tab==='clients'?'#e3f2fd':'none';
-  document.getElementById('vp-side-clients').style.color=tab==='clients'?'#1565c0':'#666';
-  document.getElementById('vp-side-clients').style.borderBottom=tab==='clients'?'2px solid #1565c0':'none';
-  document.getElementById('vp-side-route').style.background=tab==='route'?'#e3f2fd':'none';
-  document.getElementById('vp-side-route').style.color=tab==='route'?'#1565c0':'#666';
-  document.getElementById('vp-side-route').style.borderBottom=tab==='route'?'2px solid #1565c0':'none';
+// ===== FORMATTERS =====
+function fmtCur(v){return new Intl.NumberFormat('pt-PT',{style:'currency',currency:'EUR'}).format(v||0);}
+function fmtDate(d){if(!d)return '-';try{return new Date(d.includes('T')?d:d+'T00:00:00').toLocaleDateString('pt-PT',{day:'2-digit',month:'2-digit',year:'numeric'});}catch(e){return d;}}
+function fmtId(id){return String(id).padStart(4,'0');}
+function formatTime(d){return d.toLocaleTimeString('pt-PT',{hour:'2-digit',minute:'2-digit'});}
+function timeAgo(iso){
+  if(!iso)return '';
+  var d=(Date.now()-new Date(iso))/1000;
+  if(d<60)return 'agora mesmo';if(d<3600)return 'ha '+Math.floor(d/60)+' min';
+  if(d<86400)return 'ha '+Math.floor(d/3600)+' h';return 'ha '+Math.floor(d/86400)+' dias';
 }
 
-function vpUpdateStats() {
-  document.getElementById('vp-stat-total').textContent=vpContacts.length;
-  document.getElementById('vp-stat-a').textContent=vpContacts.filter(function(c){return c.priority==='A';}).length;
-  document.getElementById('vp-stat-b').textContent=vpContacts.filter(function(c){return c.priority==='B';}).length;
-  document.getElementById('vp-stat-c').textContent=vpContacts.filter(function(c){return c.priority==='C';}).length;
-  document.getElementById('vp-stat-route').textContent=vpRouteStops.length;
-}
-</script>
+(function(){
+  var el=document.getElementById('syncStatus');
+  if(el)el.textContent='A testar ligacao...';
+  var cbName='_diag_'+Date.now();
+  var script=document.createElement('script');
+  var timeout=setTimeout(function(){if(el)el.textContent='Timeout';},12000);
+  window[cbName]=function(data){clearTimeout(timeout);if(el)el.textContent='Ligacao OK - a carregar...';if(typeof syncAll==='function')syncAll();};
+  script.onerror=function(){clearTimeout(timeout);if(el)el.textContent='Erro de ligacao';};
+  script.src=APPS_SCRIPT_URL+'?action=ping&callback='+cbName+'&t='+Date.now();
+  document.head.appendChild(script);
+})();
 
-<script>
-(function() {{
-  var _origNav = window.navigateTo;
-  var _titles = {{}};
-  window.navigateTo = function(page) {{
-    if (page === 'visit_poland') {{
-      document.querySelectorAll('.nav-item').forEach(function(i){{ i.classList.remove('active'); }});
-      var nav = document.querySelector('.nav-item[data-page="visit_poland"]');
-      if(nav) nav.classList.add('active');
-      document.querySelectorAll('.page').forEach(function(p){{ p.style.display='none'; p.classList.remove('active'); }});
-      var pg = document.getElementById('page-visit_poland');
-      if(pg){{ pg.style.display='flex'; pg.classList.add('active'); }}
-      document.getElementById('pageTitle').textContent = '🗺️ Visit Poland';
-      if(!vpMapInited) {{ setTimeout(function(){{ vpTab('map'); }}, 100); }}
-      else if(vpMap) {{ setTimeout(function(){{ vpMap.invalidateSize(); }}, 100); }}
-      return;
-    }}
-    if (page === 'encomendas') {{
-      document.querySelectorAll('.nav-item').forEach(function(i){{ i.classList.remove('active'); }});
-      var nav2 = document.querySelector('.nav-item[data-page="encomendas"]');
-      if(nav2) nav2.classList.add('active');
-      document.querySelectorAll('.page').forEach(function(p){{ p.style.display='none'; p.classList.remove('active'); }});
-      var pg2 = document.getElementById('page-encomendas');
-      if(pg2){{ pg2.style.display='flex'; pg2.classList.add('active'); }}
-      document.getElementById('pageTitle').textContent = '📦 Encomendas';
-      return;
-    }}
-    if(_origNav) _origNav(page);
-  }};
-}})();
+
+var vpMap=null,vpMarkers={},vpRouteStops=[],vpRoutingControl=null,vpContacts=[],vpFilter='all',vpMapInited=false;
+var VP_URL="https://script.google.com/macros/s/AKfycbyWCvCt36e-oLl-elonsegSa2lNxW_T8giCKmMzt1vbcVoytRy_IWlMpupRbnipx5gG/exec";
+var VP_COORDS={"szczecin": [53.4285, 14.5528], "70-644 szczecin": [53.4285, 14.5528], "70-651 szczecin": [53.4285, 14.5528], "70-205 szczecin": [53.4285, 14.5528], "70-462 szczecin": [53.4285, 14.5528], "70-846 szczecin": [53.4285, 14.5528], "gdańsk": [54.352, 18.6466], "gdansk": [54.352, 18.6466], "gdynia": [54.5189, 18.5305], "warszawa": [52.2297, 21.0122], "warsaw": [52.2297, 21.0122], "00-693 warszawa": [52.2297, 21.0122], "00-120 warszawa": [52.2297, 21.0122], "bydgoszcz": [53.1235, 18.0084], "kościan": [52.0833, 16.65], "64-000 kościan": [52.0833, 16.65], "czosnów / warszawa": [52.3667, 20.7833], "poznań": [52.4064, 16.9252], "kołobrzeg": [54.1776, 15.5716], "78-100 kołobrzeg": [54.1776, 15.5716], "słupsk": [54.4641, 17.0285], "76-202 słupsk 2": [54.4641, 17.0285], "slupsk": [54.4641, 17.0285], "nowy sącz": [49.6237, 20.6948], "33-300 nowy sącz": [49.6237, 20.6948], "05-850 ożarów mazowiecki": [52.2, 20.8], "42-202 częstochowa": [50.8118, 19.1203], "41-503 chorzów": [50.2965, 18.9543], "76-004 sianów": [54.2333, 16.2833], "62-200 gniezno": [52.5347, 17.5826], "05-807 podkowa leśna": [52.1167, 20.7167], "87-100  toruń": [53.0138, 18.5984], "11-700 mrągowo": [53.8667, 21.3], "81-198 mosty": [54.55, 18.45], "42-350 koziegłowy": [50.6167, 19.1333], "84-250 gniewino": [54.6833, 18.2167], "75 - 511 koszalin": [54.1943, 16.1722], "goleniów": [53.5667, 14.8333], "stargard": [53.3333, 15.05], "jarocin": [51.9667, 17.5], "63-200 jarocin": [51.9667, 17.5], "gniewino": [54.6833, 18.2167], "łebcz": [54.7167, 18.3], "rytel": [53.75, 17.75], "bochnia": [49.9667, 20.4333], "32-700 bochnia": [49.9667, 20.4333], "władysławowo": [54.7833, 18.4167], "puck": [54.7167, 18.4], "wejherowo": [54.6, 18.2333], "84-200 wejherowo": [54.6, 18.2333], "maszewo": [53.4833, 14.9167], "sopot": [54.4418, 18.5601], "trzebiatów": [54.0667, 15.2667], "jaraczewo": [51.9, 17.5333], "chojnice": [53.6964, 17.5567], "89-620 chojnice": [53.6964, 17.5567], "lędziny": [50.1333, 19.0], "brusy": [53.8833, 17.7167], "wrocław": [51.1079, 17.0385], "wroclaw": [51.1079, 17.0385], "łódź": [51.7592, 19.456], "poznan": [52.4064, 16.9252]};
+var VP_PC={"A":"#e53935","B":"#fb8c00","C":"#43a047"};
+var VP_TRIP=[{name:"Porto",lat:41.1579,lon:-8.6291,type:"airport"},{name:"Wroclaw",lat:51.1079,lon:17.0385,type:"base"},{name:"Gdansk (POLFISH)",lat:54.3520,lon:18.6466,type:"fair"},{name:"Wroclaw",lat:51.1079,lon:17.0385,type:"base"},{name:"Ledziny (Admiral)",lat:50.1333,lon:19.0000,type:"meeting"},{name:"Nowy Sacz (PGR)",lat:49.6237,lon:20.6948,type:"meeting"},{name:"Wroclaw",lat:51.1079,lon:17.0385,type:"base"}];
+function vpGetCoords(city){if(!city)return null;var c=city.trim().toLowerCase();if(VP_COORDS[c])return VP_COORDS[c];for(var k in VP_COORDS){if(c.includes(k)||k.includes(c))return VP_COORDS[k];}var m=c.match(/^[\d\-]+\s+(.+)/);if(m&&VP_COORDS[m[1].trim()])return VP_COORDS[m[1].trim()];return null;}
+function vpTab(tab){var pm=document.getElementById('vp-panel-map'),pt=document.getElementById('vp-panel-trip'),bm=document.getElementById('vp-tab-map'),bt=document.getElementById('vp-tab-trip');pm.style.display=tab==='map'?'flex':'none';pt.style.display=tab==='trip'?'block':'none';bm.style.background=tab==='map'?'#1565c0':'rgba(255,255,255,0.1)';bm.style.color=tab==='map'?'white':'rgba(255,255,255,0.7)';bt.style.background=tab==='trip'?'#1565c0':'rgba(255,255,255,0.1)';bt.style.color=tab==='trip'?'white':'rgba(255,255,255,0.7)';if(tab==='map'){if(!vpMapInited)vpInitMap();else setTimeout(function(){vpMap.invalidateSize();},150);}}
+function vpInitMap(){if(vpMapInited)return;vpMapInited=true;vpMap=L.map('vp-map').setView([52.5,19.0],6);L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'OpenStreetMap',maxZoom:18}).addTo(vpMap);L.polyline(VP_TRIP.map(function(p){return[p.lat,p.lon];}),{color:'#9c27b0',weight:3,opacity:0.7,dashArray:'8,6'}).addTo(vpMap);var tc={airport:'#1565c0',base:'#7b1fa2',fair:'#e65100',meeting:'#2e7d32'};VP_TRIP.forEach(function(p){L.marker([p.lat,p.lon],{icon:L.divIcon({className:'',html:'<div style="background:'+tc[p.type]+';color:white;border:2px solid white;border-radius:6px;padding:2px 6px;font-size:10px;font-weight:700;box-shadow:0 2px 6px rgba(0,0,0,0.3);white-space:nowrap">'+p.name+'</div>',iconAnchor:[0,0]})}).addTo(vpMap);});vpLoadData();}
+async function vpLoadData(){
+  try{
+    var resp=await fetch(VP_URL+'?action=getContacts');
+    var data=await resp.json();
+    var poland=data.filter(function(c){return(c.country||'').toLowerCase()==='poland';});
+    poland.forEach(function(c){var co=vpGetCoords(c.city);c.lat=co?co[0]:null;c.lon=co?co[1]:null;c.city_resolved=c.city||'';});
+    vpContacts=poland;
+    Object.values(vpMarkers).forEach(function(m){vpMap.removeLayer(m);});
+    vpMarkers={};
+    vpContacts.forEach(function(c){if(c.lat&&c.lon)vpAddMarker(c);});
+    vpUpdateStats();vpRenderList();
+    document.getElementById('vp-last-update').textContent='Atualizado: '+new Date().toLocaleTimeString('pt-PT')+' - '+poland.length+' clientes';
+  }catch(e){console.error(e);document.getElementById('vp-last-update').textContent='Erro ao carregar';}
+}
+function vpAddMarker(c){var inR=vpRouteStops.some(function(s){return s.id===c.id;});var mk=L.marker([c.lat,c.lon],{icon:vpIcon(c,inR)}).addTo(vpMap);mk.bindPopup(function(){return vpPopup(c);},{className:'custom-popup',maxWidth:280});mk.on('click',function(){mk.openPopup();});vpMarkers[c.id]=mk;}
+function vpIcon(c,inR){var col=inR?'#1565c0':(VP_PC[c.priority]||'#666');var idx=vpRouteStops.findIndex(function(s){return s.id===c.id;});var lbl=inR&&idx>=0?(idx+1):(c.priority||'?');var sz=c.priority==='A'?34:(c.priority==='B'?30:26);return L.divIcon({className:'',html:'<div style="width:'+sz+'px;height:'+sz+'px;border-radius:50% 50% 50% 0;background:'+col+';border:2px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;color:white;font-weight:800;font-size:'+(sz>30?12:10)+'px;transform:rotate(-45deg)"><span style="transform:rotate(45deg)">'+lbl+'</span></div>',iconSize:[sz,sz],iconAnchor:[sz/2,sz],popupAnchor:[0,-sz]});}
+function vpPopup(c){var col=VP_PC[c.priority]||'#666';var inR=vpRouteStops.some(function(s){return s.id===c.id;});var d=document.createElement('div');d.innerHTML='<div class="popup-header" style="background:'+col+'">P.'+c.priority+' '+c.company+'</div><div class="popup-body"><div class="popup-row"><span>'+(c.city_resolved||'N/D')+'</span></div>'+(c.phone?'<div class="popup-row"><span>'+c.phone+'</span></div>':'')+'</div><div class="popup-actions">'+(inR?'<button class="popup-btn popup-btn-remove" onclick="vpRemRoute('+c.id+');vpMap.closePopup()">Remover</button>':'<button class="popup-btn popup-btn-add" onclick="vpAddRoute('+c.id+');vpMap.closePopup()">+ Rota</button>')+'</div>';return d;}
+function vpUpdMk(id){var c=vpContacts.find(function(x){return x.id===id;});if(!c||!vpMarkers[id])return;var inR=vpRouteStops.some(function(s){return s.id===id;});vpMarkers[id].setIcon(vpIcon(c,inR));vpMarkers[id].setPopupContent(vpPopup(c));}
+function vpAddRoute(id){var c=vpContacts.find(function(x){return x.id===id;});if(!c||vpRouteStops.some(function(s){return s.id===id;}))return;if(!c.lat){alert('Sem GPS');return;}vpRouteStops.push(c);vpUpdMk(id);vpRenderRoute();vpRenderList();vpUpdateStats();vpSideTab('route');}
+function vpRemRoute(id){vpRouteStops=vpRouteStops.filter(function(s){return s.id!==id;});vpUpdMk(id);vpRenderRoute();vpRenderList();vpUpdateStats();if(vpRoutingControl){vpMap.removeControl(vpRoutingControl);vpRoutingControl=null;}document.getElementById('vp-route-info').style.display='none';}
+function vpClearRoute(){var ids=vpRouteStops.map(function(s){return s.id;});vpRouteStops=[];ids.forEach(function(id){vpUpdMk(id);});if(vpRoutingControl){vpMap.removeControl(vpRoutingControl);vpRoutingControl=null;}document.getElementById('vp-route-info').style.display='none';vpRenderRoute();vpRenderList();vpUpdateStats();}
+function vpSelectAllA(){vpContacts.filter(function(c){return c.priority==='A'&&c.lat&&c.lon;}).forEach(function(c){if(!vpRouteStops.some(function(s){return s.id===c.id;})){vpRouteStops.push(c);vpUpdMk(c.id);}});vpRenderRoute();vpRenderList();vpUpdateStats();vpSideTab('route');}
+function vpMoveStop(i,d){var ni=i+d;if(ni<0||ni>=vpRouteStops.length)return;var t=vpRouteStops[i];vpRouteStops[i]=vpRouteStops[ni];vpRouteStops[ni]=t;vpRouteStops.forEach(function(s){vpUpdMk(s.id);});vpRenderRoute();}
+function vpCalcRoute(){if(vpRouteStops.length<2){alert('Adicione pelo menos 2 clientes');return;}if(vpRoutingControl){vpMap.removeControl(vpRoutingControl);vpRoutingControl=null;}var wps=vpRouteStops.map(function(s){return L.latLng(s.lat,s.lon);});vpRoutingControl=L.Routing.control({waypoints:wps,routeWhileDragging:false,addWaypoints:false,draggableWaypoints:false,fitSelectedRoutes:true,show:false,lineOptions:{styles:[{color:'#1565c0',weight:4,opacity:0.8}]},createMarker:function(){return null;}}).addTo(vpMap);vpRoutingControl.on('routesfound',function(e){var r=e.routes[0],dist=(r.summary.totalDistance/1000).toFixed(0),time=Math.round(r.summary.totalTime/60),h=Math.floor(time/60),m=time%60;document.getElementById('vp-ri-stops').textContent=vpRouteStops.length;document.getElementById('vp-ri-dist').textContent=dist+' km';document.getElementById('vp-ri-time').textContent=(h>0?h+'h ':'')+m+'min';document.getElementById('vp-route-info').style.display='block';});}
+function vpOptimize(){if(vpRouteStops.length<3){alert('Adicione pelo menos 3 clientes');return;}var dist=function(a,b){return Math.sqrt(Math.pow(a.lat-b.lat,2)+Math.pow(a.lon-b.lon,2));};var rem=vpRouteStops.slice(1),opt=[vpRouteStops[0]],cur=vpRouteStops[0];while(rem.length>0){var near=rem.reduce(function(best,c){return dist(cur,c)<dist(cur,best)?c:best;});opt.push(near);rem=rem.filter(function(c){return c.id!==near.id;});cur=near;}vpRouteStops=opt;vpRouteStops.forEach(function(s){vpUpdMk(s.id);});vpRenderRoute();vpCalcRoute();}
+function vpRenderRoute(){var list=document.getElementById('vp-route-stops'),act=document.getElementById('vp-route-actions'),ea=document.getElementById('vp-route-empty-actions');document.getElementById('vp-route-badge').textContent=vpRouteStops.length;if(vpRouteStops.length===0){list.innerHTML='<div style="text-align:center;color:#999;font-size:12px;padding:20px">Adicione clientes a rota</div>';act.style.display='none';ea.style.display='block';return;}ea.style.display='none';act.style.display='flex';list.innerHTML=vpRouteStops.map(function(s,i){return '<div style="display:flex;align-items:center;gap:6px;padding:7px 8px;background:#f8f9fa;border-radius:8px;border:1px solid #e0e0e0;margin-bottom:4px"><div style="width:20px;height:20px;border-radius:50%;background:'+(VP_PC[s.priority]||'#666')+';color:white;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">'+(i+1)+'</div><div style="flex:1"><div style="font-size:11px;font-weight:700">'+s.company+'</div><div style="font-size:10px;color:#666">'+s.city_resolved+'</div></div><button onclick="vpRemRoute('+s.id+')" style="background:none;border:none;color:#e53935;cursor:pointer;font-size:12px;padding:2px 4px">X</button></div>';}).join('');}
+function vpRenderList(){var list=document.getElementById('vp-clients-list');var search=(document.getElementById('vp-search').value||'').toLowerCase();var filtered=vpContacts.filter(function(c){if(vpFilter!=='all'&&c.priority!==vpFilter)return false;if(search&&!c.company.toLowerCase().includes(search)&&!(c.city_resolved||'').toLowerCase().includes(search))return false;return true;});if(!filtered.length){list.innerHTML='<div style="text-align:center;color:#999;padding:15px;font-size:12px">Nenhum cliente encontrado</div>';return;}list.innerHTML=filtered.map(function(c){var inR=vpRouteStops.some(function(s){return s.id===c.id;});var ri=vpRouteStops.findIndex(function(s){return s.id===c.id;});return '<div class="vp-card '+(inR?'in-route':'')+'" onclick="vpFocus('+c.id+')">'+(inR?'<div class="vp-route-num">'+(ri+1)+'</div>':'')+'<div style="display:flex;align-items:center;gap:6px;margin-bottom:3px"><div style="width:18px;height:18px;border-radius:50%;background:'+(VP_PC[c.priority]||'#999')+';color:white;font-size:9px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0">'+(c.priority||'?')+'</div><div style="font-size:12px;font-weight:700;color:#0d2137;flex:1">'+c.company+'</div></div><div style="font-size:11px;color:#666;margin-bottom:4px">'+(c.city_resolved||'N/D')+'</div><button onclick="event.stopPropagation();'+(inR?'vpRemRoute('+c.id+')':'vpAddRoute('+c.id+')')+'" style="padding:2px 8px;border:1.5px solid '+(inR?'#e53935':'#1565c0')+';border-radius:20px;background:none;color:'+(inR?'#e53935':'#1565c0')+';font-size:10px;font-weight:600;cursor:pointer">'+(inR?'Remover':'+ Rota')+'</button></div>';}).join('');}
+function vpFocus(id){var c=vpContacts.find(function(x){return x.id===id;});if(!c||!c.lat)return;vpMap.setView([c.lat,c.lon],11,{animate:true});if(vpMarkers[id])vpMarkers[id].openPopup();}
+function vpSetFilter(f,btn){vpFilter=f;document.querySelectorAll('.vp-filter').forEach(function(b){b.classList.remove('active');});btn.classList.add('active');vpRenderList();}
+function vpSideTab(tab){var pc=document.getElementById('vp-panel-clients'),pr=document.getElementById('vp-panel-route'),sc=document.getElementById('vp-side-clients'),sr=document.getElementById('vp-side-route');pc.style.display=tab==='clients'?'flex':'none';pr.style.display=tab==='route'?'flex':'none';sc.style.background=tab==='clients'?'#e3f2fd':'none';sc.style.color=tab==='clients'?'#1565c0':'#666';sc.style.borderBottom=tab==='clients'?'2px solid #1565c0':'none';sc.style.marginBottom=tab==='clients'?'-2px':'0';sr.style.background=tab==='route'?'#e3f2fd':'none';sr.style.color=tab==='route'?'#1565c0':'#666';sr.style.borderBottom=tab==='route'?'2px solid #1565c0':'none';sr.style.marginBottom=tab==='route'?'-2px':'0';}
+function vpUpdateStats(){document.getElementById('vp-stat-total').textContent=vpContacts.length;document.getElementById('vp-stat-a').textContent=vpContacts.filter(function(c){return c.priority==='A';}).length;document.getElementById('vp-stat-b').textContent=vpContacts.filter(function(c){return c.priority==='B';}).length;document.getElementById('vp-stat-c').textContent=vpContacts.filter(function(c){return c.priority==='C';}).length;document.getElementById('vp-stat-route').textContent=vpRouteStops.length;}
+var calEvents=JSON.parse(localStorage.getItem('gialmar_cal_events')||'[]');
+// Auto-render calendar when overlay becomes visible
+document.addEventListener('DOMContentLoaded', function() {
+  var calOv = document.getElementById('crm-overlay-calendario');
+  if (calOv) {
+    var observer = new MutationObserver(function(mutations) {
+      mutations.forEach(function(m) {
+        if (m.target.classList.contains('active')) {
+          setTimeout(function() { calRender(); }, 100);
+        }
+      });
+    });
+    observer.observe(calOv, { attributes: true, attributeFilter: ['class'] });
+  }
+});
+var calDate=new Date(),calView='month',calEditId=null,calSelColor='#0078d4';
+(function(){// Clear old trip events and reload fresh ones
+var _calVersion = '2026-v2';
+if(localStorage.getItem('gialmar_cal_version') !== _calVersion) {
+  var _existing = JSON.parse(localStorage.getItem('gialmar_cal_events')||'[]');
+  _existing = _existing.filter(function(e){ return !e.id.startsWith('trip'); });
+  localStorage.setItem('gialmar_cal_events', JSON.stringify(_existing));
+  localStorage.setItem('gialmar_cal_version', _calVersion);
+  calEvents = _existing;
+}
+var te=[
+  {id:'trip1',title:'✈️ Porto → Wrocław',start:'2026-09-09T20:35',end:'2026-09-09T23:00',color:'#1565c0',notes:'Voo TAP Porto → Wrocław',reminder:'60'},
+  {id:'trip2',title:'🎪 POLFISH – Dia 1',start:'2026-09-10T09:00',end:'2026-09-10T18:00',color:'#7b1fa2',notes:'Feira POLFISH, Gdańsk – Hotel Arena Expo',reminder:'30'},
+  {id:'trip3',title:'🎪 POLFISH – Dia 2',start:'2026-09-11T09:00',end:'2026-09-11T18:00',color:'#7b1fa2',notes:'Feira POLFISH, Gdańsk – Hotel Arena Expo',reminder:'30'},
+  {id:'trip4',title:'🎪 POLFISH – Dia 3 + Regresso Wrocław',start:'2026-09-12T09:00',end:'2026-09-12T22:00',color:'#7b1fa2',notes:'Feira POLFISH manhã + viagem Gdańsk → Wrocław (Hotel Traffic)',reminder:'30'},
+  {id:'trip5',title:'🏖️ Dia Livre – Empresas fechadas',start:'2026-09-13T09:00',end:'2026-09-13T18:00',color:'#78909c',notes:'Domingo – empresas fechadas. Dia livre em Wrocław.',reminder:''},
+  {id:'trip6',title:'🤝 Admiral – Lędziny',start:'2026-09-14T10:00',end:'2026-09-14T12:00',color:'#2e7d32',notes:'Reunião com Admiral em Lędziny',reminder:'60'},
+  {id:'trip7',title:'⭐ Polska Grupa Rybna – Nowy Sącz',start:'2026-09-15T10:00',end:'2026-09-15T12:00',color:'#e53935',notes:'Reunião com Polska Grupa Rybna em Nowy Sącz',reminder:'60'},
+  {id:'trip8',title:'✈️ Wrocław → Porto',start:'2026-09-16T17:35',end:'2026-09-16T20:00',color:'#1565c0',notes:'Voo Wrocław → Porto (17:35)',reminder:'120'}
+];te.forEach(function(ev){if(!calEvents.some(function(e){return e.id===ev.id;}))calEvents.push(ev);});localStorage.setItem('gialmar_cal_events',JSON.stringify(calEvents));})();
+function calSave(){localStorage.setItem('gialmar_cal_events',JSON.stringify(calEvents));}
+function calToday(){calDate=new Date();calRender();}
+function calNav(dir){if(calView==='month')calDate.setMonth(calDate.getMonth()+dir);else if(calView==='week')calDate.setDate(calDate.getDate()+dir*7);else calDate.setDate(calDate.getDate()+dir);calRender();}
+function calSetView(v){calView=v;['month','week','day'].forEach(function(x){var b=document.getElementById('cal-btn-'+x);if(b){b.style.background=x===v?'#0078d4':'white';b.style.color=x===v?'white':'#333';b.style.borderColor=x===v?'#0078d4':'#e0e0e0';}});calRender();}
+function calRender(){if(calView==='month')calRenderMonth();else if(calView==='week')calRenderWeek();else calRenderDay();calRenderMini();calRenderUpcoming();}
+function calEventsForDay(y,m,d){return calEvents.filter(function(ev){var s=new Date(ev.start);return s.getFullYear()===y&&s.getMonth()===m&&s.getDate()===d;});}
+function calRenderMonth(){var y=calDate.getFullYear(),m=calDate.getMonth();document.getElementById('cal-title').textContent=calDate.toLocaleDateString('pt-PT',{month:'long',year:'numeric'});var first=new Date(y,m,1),last=new Date(y,m+1,0),startDay=first.getDay()===0?6:first.getDay()-1,today=new Date();var html='<div style="display:grid;grid-template-columns:repeat(7,1fr);height:100%;min-height:500px">';['Seg','Ter','Qua','Qui','Sex','Sab','Dom'].forEach(function(d){html+='<div style="padding:8px;text-align:center;font-size:12px;font-weight:700;color:#666;background:white;border-bottom:1px solid #e0e0e0;border-right:1px solid #f0f0f0">'+d+'</div>';});var total=Math.ceil((startDay+last.getDate())/7)*7;for(var i=0;i<total;i++){var dn=i-startDay+1,valid=dn>=1&&dn<=last.getDate(),isT=valid&&dn===today.getDate()&&m===today.getMonth()&&y===today.getFullYear(),evs=valid?calEventsForDay(y,m,dn):[];html+='<div onclick="'+(valid?'calOpenNew(new Date('+y+','+(m)+','+dn+'))':'')+'" style="border-right:1px solid #f0f0f0;border-bottom:1px solid #f0f0f0;padding:6px;min-height:90px;background:'+(valid?'white':'#fafafa')+';cursor:'+(valid?'pointer':'default')+';overflow:hidden"><div style="width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:'+(isT?'800':'500')+';color:'+(isT?'white':'#333')+';background:'+(isT?'#0078d4':'transparent')+';margin-bottom:3px">'+(valid?dn:'')+'</div>';evs.slice(0,3).forEach(function(ev){html+='<div class="cal-event" style="background:'+ev.color+';color:white" onclick="event.stopPropagation();calEditEvent(''+ev.id+'')">'+ev.title+'</div>';});if(evs.length>3)html+='<div style="font-size:10px;color:#666;font-weight:600">+'+(evs.length-3)+' mais</div>';html+='</div>';}html+='</div>';document.getElementById('cal-main').innerHTML=html;}
+function calRenderWeek(){var start=new Date(calDate);start.setDate(start.getDate()-start.getDay()+1);document.getElementById('cal-title').textContent=start.toLocaleDateString('pt-PT',{day:'numeric',month:'short'})+' - '+new Date(start.getTime()+6*86400000).toLocaleDateString('pt-PT',{day:'numeric',month:'short',year:'numeric'});var today=new Date(),hours=[];for(var h=7;h<=21;h++)hours.push(h);var html='<div style="display:flex;flex-direction:column;min-width:700px"><div style="display:grid;grid-template-columns:60px repeat(7,1fr);border-bottom:2px solid #e0e0e0;background:white;position:sticky;top:0;z-index:10"><div style="padding:8px;border-right:1px solid #e0e0e0"></div>';for(var di=0;di<7;di++){var dd=new Date(start);dd.setDate(dd.getDate()+di);var isT=dd.toDateString()===today.toDateString();html+='<div style="padding:8px;text-align:center;border-right:1px solid #f0f0f0"><div style="font-size:11px;color:#666">'+['Seg','Ter','Qua','Qui','Sex','Sab','Dom'][di]+'</div><div style="width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;margin:2px auto;background:'+(isT?'#0078d4':'transparent')+';color:'+(isT?'white':'#333')+'">'+dd.getDate()+'</div></div>';}html+='</div>';hours.forEach(function(h){html+='<div style="display:grid;grid-template-columns:60px repeat(7,1fr);border-bottom:1px solid #f0f0f0"><div style="padding:4px 8px;font-size:11px;color:#999;text-align:right;border-right:1px solid #e0e0e0">'+h+':00</div>';for(var di=0;di<7;di++){var dd=new Date(start);dd.setDate(dd.getDate()+di);var evs=calEvents.filter(function(ev){var s=new Date(ev.start);return s.getFullYear()===dd.getFullYear()&&s.getMonth()===dd.getMonth()&&s.getDate()===dd.getDate()&&s.getHours()===h;});html+='<div style="border-right:1px solid #f0f0f0;padding:2px;min-height:40px;cursor:pointer" onclick="calOpenNew(new Date('+dd.getFullYear()+','+(dd.getMonth())+','+dd.getDate()+','+h+',0))">';evs.forEach(function(ev){html+='<div class="cal-event" style="background:'+ev.color+';color:white" onclick="event.stopPropagation();calEditEvent(''+ev.id+'')">'+new Date(ev.start).toLocaleTimeString('pt-PT',{hour:'2-digit',minute:'2-digit'})+' '+ev.title+'</div>';});html+='</div>';}html+='</div>';});html+='</div>';document.getElementById('cal-main').innerHTML=html;}
+function calRenderDay(){var y=calDate.getFullYear(),m=calDate.getMonth(),d=calDate.getDate();document.getElementById('cal-title').textContent=calDate.toLocaleDateString('pt-PT',{weekday:'long',day:'numeric',month:'long',year:'numeric'});var hours=[];for(var h=7;h<=21;h++)hours.push(h);var html='<div style="min-width:400px">';hours.forEach(function(h){var evs=calEvents.filter(function(ev){var s=new Date(ev.start);return s.getFullYear()===y&&s.getMonth()===m&&s.getDate()===d&&s.getHours()===h;});html+='<div style="display:flex;border-bottom:1px solid #f0f0f0;min-height:50px"><div style="width:70px;padding:4px 10px;font-size:12px;color:#999;text-align:right;border-right:1px solid #e0e0e0;flex-shrink:0">'+h+':00</div><div style="flex:1;padding:4px 8px;cursor:pointer" onclick="calOpenNew(new Date('+y+','+(m)+','+d+','+h+',0))">';evs.forEach(function(ev){html+='<div class="cal-event" style="background:'+ev.color+';color:white;padding:4px 8px;margin-bottom:3px;border-radius:4px;font-size:12px" onclick="event.stopPropagation();calEditEvent(''+ev.id+'')" ><div style="font-weight:700">'+ev.title+'</div><div style="font-size:11px;opacity:0.9">'+new Date(ev.start).toLocaleTimeString('pt-PT',{hour:'2-digit',minute:'2-digit'})+' - '+new Date(ev.end).toLocaleTimeString('pt-PT',{hour:'2-digit',minute:'2-digit'})+'</div>'+(ev.notes?'<div style="font-size:11px;opacity:0.85;margin-top:2px">'+ev.notes+'</div>':'')+'</div>';});html+='</div></div>';});html+='</div>';document.getElementById('cal-main').innerHTML=html;}
+function calRenderMini(){var y=calDate.getFullYear(),m=calDate.getMonth(),first=new Date(y,m,1),last=new Date(y,m+1,0),startDay=first.getDay()===0?6:first.getDay()-1,today=new Date();var html='<div><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px"><button onclick="calDate.setMonth(calDate.getMonth()-1);calRender()" style="background:none;border:none;cursor:pointer;color:#666;font-size:14px">&lt;</button><div style="font-size:12px;font-weight:700">'+calDate.toLocaleDateString('pt-PT',{month:'short',year:'numeric'})+'</div><button onclick="calDate.setMonth(calDate.getMonth()+1);calRender()" style="background:none;border:none;cursor:pointer;color:#666;font-size:14px">&gt;</button></div><div style="display:grid;grid-template-columns:repeat(7,1fr);gap:1px">';['S','T','Q','Q','S','S','D'].forEach(function(d){html+='<div style="text-align:center;font-size:10px;font-weight:700;color:#999;padding:2px">'+d+'</div>';});var total=Math.ceil((startDay+last.getDate())/7)*7;for(var i=0;i<total;i++){var dn=i-startDay+1,valid=dn>=1&&dn<=last.getDate(),isT=valid&&dn===today.getDate()&&m===today.getMonth()&&y===today.getFullYear(),isSel=valid&&dn===calDate.getDate()&&m===calDate.getMonth()&&y===calDate.getFullYear(),hasEv=valid&&calEventsForDay(y,m,dn).length>0;html+='<div onclick="'+(valid?'calDate=new Date('+y+','+(m)+','+dn+');calRender()':'')+'" style="text-align:center;font-size:11px;padding:3px 1px;border-radius:50%;cursor:'+(valid?'pointer':'default')+';background:'+(isT?'#0078d4':isSel?'#e3f2fd':'transparent')+';color:'+(isT?'white':'#333')+';font-weight:'+(hasEv?'700':'400')+'">'+(valid?dn:'')+'</div>';}html+='</div></div>';document.getElementById('cal-mini').innerHTML=html;}
+function calRenderUpcoming(){var now=new Date(),up=calEvents.filter(function(ev){return new Date(ev.start)>=now;}).sort(function(a,b){return new Date(a.start)-new Date(b.start);}).slice(0,5);if(!up.length){document.getElementById('cal-upcoming').innerHTML='<div style="font-size:12px;color:#999">Sem eventos proximos</div>';return;}document.getElementById('cal-upcoming').innerHTML=up.map(function(ev){var s=new Date(ev.start);return '<div onclick="calEditEvent(''+ev.id+'')" style="display:flex;gap:8px;padding:6px 0;border-bottom:1px solid #f0f0f0;cursor:pointer"><div style="width:4px;border-radius:2px;background:'+ev.color+';flex-shrink:0"></div><div><div style="font-size:12px;font-weight:600;color:#333">'+ev.title+'</div><div style="font-size:11px;color:#999">'+s.toLocaleDateString('pt-PT',{day:'numeric',month:'short'})+' '+s.toLocaleTimeString('pt-PT',{hour:'2-digit',minute:'2-digit'})+'</div></div></div>';}).join('');}
+function calSelectColor(color,el){calSelColor=color;document.querySelectorAll('#cal-color-picker div').forEach(function(d){d.style.border='none';d.style.boxShadow='none';});el.style.border='3px solid '+color;el.style.boxShadow='0 0 0 2px white inset';}
+function calOpenNew(date){calEditId=null;document.getElementById('cal-modal-title').textContent='Novo Evento';document.getElementById('cal-btn-delete').style.display='none';document.getElementById('cal-ev-title').value='';document.getElementById('cal-ev-notes').value='';document.getElementById('cal-ev-reminder').value='';calSelColor='#0078d4';document.querySelectorAll('#cal-color-picker div').forEach(function(d){d.style.border='none';d.style.boxShadow='none';});document.querySelector('#cal-color-picker div').style.border='3px solid #0078d4';document.querySelector('#cal-color-picker div').style.boxShadow='0 0 0 2px white inset';var d=date||new Date(),pad=function(n){return n.toString().padStart(2,'0');},fmt=function(dt){return dt.getFullYear()+'-'+pad(dt.getMonth()+1)+'-'+pad(dt.getDate())+'T'+pad(dt.getHours())+':'+pad(dt.getMinutes());};document.getElementById('cal-ev-start').value=fmt(d);var end=new Date(d);end.setHours(end.getHours()+1);document.getElementById('cal-ev-end').value=fmt(end);document.getElementById('cal-modal').style.display='flex';}
+function calEditEvent(id){var ev=calEvents.find(function(e){return e.id===id;});if(!ev)return;calEditId=id;document.getElementById('cal-modal-title').textContent='Editar Evento';document.getElementById('cal-btn-delete').style.display='block';document.getElementById('cal-ev-title').value=ev.title;document.getElementById('cal-ev-notes').value=ev.notes||'';document.getElementById('cal-ev-reminder').value=ev.reminder||'';document.getElementById('cal-ev-start').value=ev.start;document.getElementById('cal-ev-end').value=ev.end;calSelColor=ev.color||'#0078d4';document.querySelectorAll('#cal-color-picker div').forEach(function(d){d.style.border='none';d.style.boxShadow='none';});document.querySelectorAll('#cal-color-picker div').forEach(function(d){if(d.style.background===calSelColor){d.style.border='3px solid '+calSelColor;d.style.boxShadow='0 0 0 2px white inset';}});document.getElementById('cal-modal').style.display='flex';}
+function calSaveEvent(){var title=document.getElementById('cal-ev-title').value.trim();if(!title){alert('Introduza um titulo');return;}var ev={id:calEditId||('ev_'+Date.now()),title:title,start:document.getElementById('cal-ev-start').value,end:document.getElementById('cal-ev-end').value,color:calSelColor,notes:document.getElementById('cal-ev-notes').value,reminder:document.getElementById('cal-ev-reminder').value};if(calEditId)calEvents=calEvents.map(function(e){return e.id===calEditId?ev:e;});else calEvents.push(ev);calSave();calCloseModal();calRender();}
+function calDeleteEvent(){if(!calEditId)return;if(!confirm('Eliminar este evento?'))return;calEvents=calEvents.filter(function(e){return e.id!==calEditId;});calSave();calCloseModal();calRender();}
+function calCloseModal(){document.getElementById('cal-modal').style.display='none';calEditId=null;}
 </script>
 </body>
 </html>
